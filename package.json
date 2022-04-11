@@ -1,0 +1,25 @@
+{
+  "name": "starknet-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze starknet onchain data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d-s-i/starknet-analyzer.git"
+  },
+  "author": "dsi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/d-s-i/starknet-analyzer/issues"
+  },
+  "homepage": "https://github.com/d-s-i/starknet-analyzer#readme",
+  "devDependencies": {
+    "ethers": "^5.6.2",
+    "starknet": "^3.9.0",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  }
+}
