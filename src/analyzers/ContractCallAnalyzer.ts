@@ -115,6 +115,7 @@ export class ContractCallAnalyzer {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }
 
+
         const eventAbi = this.getEventAbiFromKey(event.keys[0]);
         
         let dataIndex = 0;
@@ -128,7 +129,6 @@ export class ContractCallAnalyzer {
             eventArgs.push({ ...arg, value: argsValues });
         }
         return { name: eventAbi.name, transmitterContract: event.from_address, calldata: eventArgs } as OrganizedEvent;
-
     }
 
     _getArgumentsValuesFromCalldata(

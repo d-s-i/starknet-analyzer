@@ -34,11 +34,13 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
             let functionCalls: FunctionCall[] | undefined;
             for(const event of receipt.events) {
                 // const eventCalldata = await this.getEventOutput(event);
-                const contractCallAnalyzer = await this.getContractAnalyzer(event.from_address);
-                const eventCalldata = await contractCallAnalyzer.organizeEvent(event);
-                if(eventCalldata) {
-                    events.push(eventCalldata);
-                }
+                const contractCallAnalyzer = await new ContractCallAnalyzer(event.from_address).initialize(this.provider);
+                try {
+                    const eventCalldata = contractCallAnalyzer.organizeEvent(event);
+                    if(eventCalldata) {
+                        events.push(eventCalldata);
+                    }
+                } catch(error) {}
 
                 functionCalls = await this.getCalldataPerCallFromTx(tx);
                 await sleep(2000);
