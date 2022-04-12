@@ -10,9 +10,9 @@ Should be run on Linux
 
 # Examples
 
-1) ContractCallAnalyzer
+## ContractCallAnalyzer
 
-How to intiialize: 
+### How to intiialize: 
 
 ```
 import { defaultProvider } from "starknet";
@@ -33,9 +33,9 @@ const { events, functions, structs } = await ContractCallAnalyzer.getContractAbi
 const contractCallAnalyzer = new ContractCallAnalyzer(contractAddr, structs, functions, events);
 ```
 
-How to use:
+### How to use:
 
-Function outputs (example: view functions)
+#### Function outputs (example: view functions)
 
 ```
 import { defaultProvider } from "starknet";
@@ -78,12 +78,12 @@ console.log(amountsOut);
 */
 ```
 
-Function Inputs:
+#### Function Inputs:
 
 Not really used on its own. Work better with a full transaction calldata.
 See `TransactionCallAnalyzer.ts::getCalldataPerCall` for an example.
 
-Events:
+#### Events:
 
 ```
 import { defaultProvider } from "starknet";
@@ -119,9 +119,9 @@ console.log(events);
 */
 ```
 
-2) TransactionCallAnalyzer
+## TransactionCallAnalyzer
 
-How to use:
+### How to use:
 
 ```
 import { TransactionCallAnalyzer } from "starknet-analyzer/lib/analyzers/TransactionCallAnalyzer";
@@ -149,9 +149,9 @@ const functionCalls = await transactionCallAnalyzer.getCalldataPerCallFromTx(tx)
 */
 ```
 
-3) BlockAnalyzer
+## BlockAnalyzer
 
-How to use:
+### How to use:
 
 ```
 import { defaultProvider } from "starknet";
