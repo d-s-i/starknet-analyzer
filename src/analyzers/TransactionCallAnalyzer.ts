@@ -4,7 +4,7 @@ import {
     Provider
 } from "starknet";
 
-import { callArrayStructLength } from "../lib/constants";
+import { callArrayStructLength } from "../helpers/constants";
 // import { 
 //     Event,
 // } from "../types/rawStarknet";

@@ -15,7 +15,7 @@ import {
 } from "../types/organizedStarknet";
 import { TransactionCallAnalyzer } from "./TransactionCallAnalyzer";
 import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
-import { sleep } from "../lib/helpers";
+import { sleep } from "../helpers/helpers";
 
 export class BlockAnalyzer extends TransactionCallAnalyzer {
 
