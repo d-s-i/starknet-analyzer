@@ -10,7 +10,7 @@ import {
 } from "../types/organizedStarknet";
 import { Event, GetCodeResponse } from "../types/rawStarknet";
 import { Provider } from "starknet";
-import { getSelectorFromName } from "starknet/utils/hash";
+import { getFullSelector } from "../helpers/helpers";
 
 export class ContractCallAnalyzer {
 
@@ -18,17 +18,20 @@ export class ContractCallAnalyzer {
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
     private _address: string;
+    private _provider: Provider | undefined;
 
     constructor(
         contractAddress: string,
         structs?: OrganizedStructAbi, 
         functions?: OrganizedFunctionAbi, 
         events?: OrganizedEventAbi,
+        provider?: Provider
     ) {
         this._address = contractAddress;
         this._structs = structs;
         this._functions = functions;
         this._events = events;
+        this._provider = provider;
     }
 
     static async getContractAbi(contractAddress: string, provider: Provider) {
@@ -39,7 +42,7 @@ export class ContractCallAnalyzer {
         let structs: OrganizedStructAbi = {};
         for(const item of abi) {
             if(item.type === "function") {
-                const _name = BigNumber.from(getSelectorFromName(item.name)).toHexString()
+                const _name = getFullSelector(item.name)
                 functions[_name] = item;
             }
             if(item.type === "struct") {
@@ -49,19 +52,44 @@ export class ContractCallAnalyzer {
                 };
             }
             if(item.type === "event") {
-                const _name = BigNumber.from(getSelectorFromName(item.name)).toHexString()
+                const _name = getFullSelector(item.name)
                 events[_name] = item;
             }
         }
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    async initialize(provider: Provider) {
-        const { events, functions, structs } = await ContractCallAnalyzer.getContractAbi(this.address, provider);
+    async initialize(provider?: Provider) {
+        const _provider = provider ? provider : this.provider;
+        if(!_provider) {
+            throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
+        }
+        const { events, functions, structs } = await ContractCallAnalyzer.getContractAbi(this.address, _provider);
         this._structs = structs;
         this._functions = functions;
         this._events = events;
         return this;
+    }
+
+    async callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: Provider) {
+        const _provider = provider ? provider : this.provider;
+        if(!_provider) {
+            throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
+        }
+        const { result: rawRes } = await _provider.callContract({
+            contractAddress: this.address,
+            entrypoint,
+            calldata: calldata || []
+        });
+    
+        const rawResBN = rawRes.map((rawPool: any) => BigNumber.from(rawPool));
+    
+        const { subcalldata } = this.organizeFunctionOutput(
+            getFullSelector(entrypoint),
+            rawResBN
+        ) as any;
+
+        return subcalldata;
     }
 
     organizeFunctionInput(
@@ -308,5 +336,9 @@ export class ContractCallAnalyzer {
 
     get events() {
         return this._events;
+    }
+
+    get provider() {
+        return this._provider;
     }
 }
