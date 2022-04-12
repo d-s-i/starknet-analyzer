@@ -3,13 +3,15 @@ import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetAr
 import { Event } from "../types/rawStarknet";
 import { Provider } from "starknet";
 export declare class ContractCallAnalyzer {
+    private _address;
     private _structs;
     private _functions;
     private _events;
-    private _address;
-    constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi);
+    private _provider;
+    constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: Provider);
     static getContractAbi(contractAddress: string, provider: Provider): Promise<StarknetContractCode>;
-    initialize(provider: Provider): Promise<this>;
+    initialize(provider?: Provider): Promise<this>;
+    callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: Provider): Promise<any>;
     organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
         subcalldata: {
             [key: string]: any;
@@ -63,5 +65,6 @@ export declare class ContractCallAnalyzer {
     get structs(): OrganizedStructAbi | undefined;
     get functions(): OrganizedFunctionAbi | undefined;
     get events(): OrganizedEventAbi | undefined;
+    get provider(): Provider | undefined;
 }
 //# sourceMappingURL=ContractCallAnalyzer.d.ts.map
