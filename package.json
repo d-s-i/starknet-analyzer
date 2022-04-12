@@ -2,9 +2,11 @@
   "name": "starknet-analyzer",
   "version": "1.0.3",
   "description": "Analyze starknet onchain data",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p ."
   },
   "repository": {
     "type": "git",
