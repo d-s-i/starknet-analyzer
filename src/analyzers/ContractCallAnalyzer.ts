@@ -14,10 +14,10 @@ import { getFullSelector } from "../helpers/helpers";
 
 export class ContractCallAnalyzer {
 
+    private _address: string;
     private _structs: OrganizedStructAbi | undefined;
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
-    private _address: string;
     private _provider: Provider | undefined;
 
     constructor(
@@ -68,6 +68,7 @@ export class ContractCallAnalyzer {
         this._structs = structs;
         this._functions = functions;
         this._events = events;
+        this._provider = _provider;
         return this;
     }
 

@@ -5,9 +5,6 @@ import {
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
-// import { 
-//     Event,
-// } from "../types/rawStarknet";
 import {
     FunctionCall,
     CallArray,
@@ -34,24 +31,6 @@ export class TransactionCallAnalyzer {
             return undefined;
         }
     }
-
-    // not sure if it is useful there, it's quite similar to `organizeEvent` at `ContractCallAnalyzer`
-    // async getEventOutput(event: Event) {
-    //     const { structs, functions, events } = await ContractCallAnalyzer.getContractAbi(event.from_address, this.provider);
-    //     const contractCallAnalyzer = new ContractCallAnalyzer(
-    //         event.from_address,
-    //         structs,
-    //         functions,
-    //         events
-    //     );
-
-    //     try {
-    //         const structuredEvent = await contractCallAnalyzer.organizeEvent(event);
-    //         return structuredEvent;
-    //     } catch(error) {
-    //         return undefined;
-    //     }
-    // }
 
     async getCalldataPerCall(
         callArray: CallArray[],
