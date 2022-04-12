@@ -14,6 +14,7 @@ import {
     OrganizedTransaction
 } from "../types/organizedStarknet";
 import { TransactionCallAnalyzer } from "./TransactionCallAnalyzer";
+import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
 import { sleep } from "../lib/helpers";
 
 export class BlockAnalyzer extends TransactionCallAnalyzer {
@@ -32,7 +33,9 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
             let events: OrganizedEvent[] = [];
             let functionCalls: FunctionCall[] | undefined;
             for(const event of receipt.events) {
-                const eventCalldata = await this.getEventOutput(event);
+                // const eventCalldata = await this.getEventOutput(event);
+                const contractCallAnalyzer = await this.getContractAnalyzer(event.from_address);
+                const eventCalldata = await contractCallAnalyzer.organizeEvent(event);
                 if(eventCalldata) {
                     events.push(eventCalldata);
                 }

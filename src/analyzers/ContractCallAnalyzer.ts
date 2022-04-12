@@ -61,6 +61,7 @@ export class ContractCallAnalyzer {
         this._structs = structs;
         this._functions = functions;
         this._events = events;
+        return this;
     }
 
     organizeFunctionInput(

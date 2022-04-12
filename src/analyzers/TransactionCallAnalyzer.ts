@@ -5,9 +5,9 @@ import {
 } from "starknet";
 
 import { callArrayStructLength } from "../lib/constants";
-import { 
-    Event,
-} from "../types/rawStarknet";
+// import { 
+//     Event,
+// } from "../types/rawStarknet";
 import {
     FunctionCall,
     CallArray,
@@ -16,10 +16,12 @@ import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
 
 export class TransactionCallAnalyzer {
 
-    private _provider: Provider
+    private _provider: Provider;
+    private _contractCallAnalyzers: { [address: string]: ContractCallAnalyzer };
     
     constructor(provider: Provider) {
         this._provider = provider;
+        this._contractCallAnalyzers = {};
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
@@ -34,22 +36,22 @@ export class TransactionCallAnalyzer {
     }
 
     // not sure if it is useful there, it's quite similar to `organizeEvent` at `ContractCallAnalyzer`
-    async getEventOutput(event: Event) {
-        const { structs, functions, events } = await ContractCallAnalyzer.getContractAbi(event.from_address, this.provider);
-        const contractCallAnalyzer = new ContractCallAnalyzer(
-            event.from_address,
-            structs,
-            functions,
-            events
-        );
+    // async getEventOutput(event: Event) {
+    //     const { structs, functions, events } = await ContractCallAnalyzer.getContractAbi(event.from_address, this.provider);
+    //     const contractCallAnalyzer = new ContractCallAnalyzer(
+    //         event.from_address,
+    //         structs,
+    //         functions,
+    //         events
+    //     );
 
-        try {
-            const structuredEvent = await contractCallAnalyzer.organizeEvent(event);
-            return structuredEvent;
-        } catch(error) {
-            return undefined;
-        }
-    }
+    //     try {
+    //         const structuredEvent = await contractCallAnalyzer.organizeEvent(event);
+    //         return structuredEvent;
+    //     } catch(error) {
+    //         return undefined;
+    //     }
+    // }
 
     async getCalldataPerCall(
         callArray: CallArray[],
@@ -57,12 +59,10 @@ export class TransactionCallAnalyzer {
     ) {
         let rawCalldataIndex = 0;
         let functionCalls = [];
-        let contractAnalyzers: { [key: string]: ContractCallAnalyzer } = {};
         for(const call of callArray) {
-            const { contractAnalyzer, newContractAnalyzer } = await this.getContractAnalyzer(call.to.toHexString(), contractAnalyzers);
-            contractAnalyzers = newContractAnalyzer; 
+            const contractCallAnalyzer = await this.getContractAnalyzer(call.to.toHexString());
     
-            const { subcalldata, endIndex } = contractAnalyzer.organizeFunctionInput(
+            const { subcalldata, endIndex } = contractCallAnalyzer.organizeFunctionInput(
                 call.selector.toHexString(), 
                 fullTxCalldata, 
                 rawCalldataIndex, 
@@ -72,7 +72,7 @@ export class TransactionCallAnalyzer {
             }
             rawCalldataIndex = endIndex;
             functionCalls.push({
-                name: contractAnalyzer.getFunctionAbiFromSelector(call.selector.toHexString()).name,
+                name: contractCallAnalyzer.getFunctionAbiFromSelector(call.selector.toHexString()).name,
                 to: call.to,
                 calldata: subcalldata
             });
@@ -81,17 +81,14 @@ export class TransactionCallAnalyzer {
     }
     
     async getContractAnalyzer(
-        address: string, 
-        contractAnalyzers: { [key: string]: ContractCallAnalyzer }
+        address: string
     ) {
         // store contract to avoid fetching the same contract twice for the same function call
-        if(!contractAnalyzers[address]) {
-            const { functions, structs, events } = await ContractCallAnalyzer.getContractAbi(address, this.provider);
-            let newContractAnalyzer = contractAnalyzers;
-            newContractAnalyzer[address] = new ContractCallAnalyzer(address, structs, functions, events);
-            return { contractAnalyzer: newContractAnalyzer[address], newContractAnalyzer };
+        if(!this.contractCallAnalyzers[address]) {
+            this.contractCallAnalyzers[address] = await new ContractCallAnalyzer(address).initialize(this.provider);
+            return this.contractCallAnalyzers[address];
         } else {
-            return { contractAnalyzer: contractAnalyzers[address], newContractAnalyzer: contractAnalyzers };
+            return this.contractCallAnalyzers[address];
         }
     
     }
@@ -149,5 +146,9 @@ export class TransactionCallAnalyzer {
 
     get provider() {
         return this._provider;
+    }
+
+    get contractCallAnalyzers() {
+        return this._contractCallAnalyzers;
     }
 }
