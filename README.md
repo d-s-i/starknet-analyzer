@@ -49,53 +49,53 @@
 
 ```
 [
-{
-  name: 'pools_ptr_len',
-  type: 'felt',
-  value: BigNumber { _hex: '0x04', _isBigNumber: true }
-}
-{
-  name: 'pools_ptr',
-  type: 'Pool*',
-  value: [
     {
-      name: [BigNumber],
-      token_a_address: [BigNumber],
-      token_a_reserves: [BigNumber],
-      token_b_address: [BigNumber],
-      token_b_reserves: [BigNumber],
-      fee_percentage: [BigNumber],
-      cfmm_type: [BigNumber]
-    },
-    {
-      name: [BigNumber],
-      token_a_address: [BigNumber],
-      token_a_reserves: [BigNumber],
-      token_b_address: [BigNumber],
-      token_b_reserves: [BigNumber],
-      fee_percentage: [BigNumber],
-      cfmm_type: [BigNumber]
-    },
-    {
-      name: [BigNumber],
-      token_a_address: [BigNumber],
-      token_a_reserves: [BigNumber],
-      token_b_address: [BigNumber],
-      token_b_reserves: [BigNumber],
-      fee_percentage: [BigNumber],
-      cfmm_type: [BigNumber]
-    },
-    {
-      name: [BigNumber],
-      token_a_address: [BigNumber],
-      token_a_reserves: [BigNumber],
-      token_b_address: [BigNumber],
-      token_b_reserves: [BigNumber],
-      fee_percentage: [BigNumber],
-      cfmm_type: [BigNumber]
+        name: 'pools_ptr_len',
+        type: 'felt',
+        value: BigNumber { _hex: '0x04', _isBigNumber: true }
     }
-  ]
-}
+    {
+        name: 'pools_ptr',
+        type: 'Pool*',
+        value: [
+            {
+                name: [BigNumber],
+                token_a_address: [BigNumber],
+                token_a_reserves: [BigNumber],
+                token_b_address: [BigNumber],
+                token_b_reserves: [BigNumber],
+                fee_percentage: [BigNumber],
+                cfmm_type: [BigNumber]
+            },
+            {
+                name: [BigNumber],
+                token_a_address: [BigNumber],
+                token_a_reserves: [BigNumber],
+                token_b_address: [BigNumber],
+                token_b_reserves: [BigNumber],
+                fee_percentage: [BigNumber],
+                cfmm_type: [BigNumber]
+            },
+            {
+                name: [BigNumber],
+                token_a_address: [BigNumber],
+                token_a_reserves: [BigNumber],
+                token_b_address: [BigNumber],
+                token_b_reserves: [BigNumber],
+                fee_percentage: [BigNumber],
+                cfmm_type: [BigNumber]
+            },
+            {
+                name: [BigNumber],
+                token_a_address: [BigNumber],
+                token_a_reserves: [BigNumber],
+                token_b_address: [BigNumber],
+                token_b_reserves: [BigNumber],
+                fee_percentage: [BigNumber],
+                cfmm_type: [BigNumber]
+            }
+        ]
+    }
 ]
 ```
 
