@@ -193,7 +193,6 @@ export class ContractCallAnalyzer {
         return { feltArray, endIndex: calldataIndex };
     }
     
-    // TODO: What if a nested property is a struct itself ? 
     _getStructFromCalldata(
         type: string,
         calldata: BigNumber[],
@@ -203,8 +202,13 @@ export class ContractCallAnalyzer {
         let structCalldata: StarknetArgument = {};
         let calldataIndex = startIndex;
         for(const property of structAbi.properties) {
-            structCalldata[property.name] = calldata[calldataIndex];
-            calldataIndex++;
+            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+                property.type,
+                { fullCalldataValues: calldata, startIndex: calldataIndex },
+
+            );
+            structCalldata[property.name] = argsValues;
+            calldataIndex = endIndex;
         }
     
         return { structCalldata, endIndex: calldataIndex };
@@ -223,8 +227,6 @@ export class ContractCallAnalyzer {
             let singleStruct: StarknetArgument = {};
  
             for(const property of structAbi.properties!) {
-                // singleStruct[property.name] = calldata[calldataIndex];
-                // property.type
                 const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
                     property.type,
                     { fullCalldataValues: calldata, startIndex: calldataIndex },
