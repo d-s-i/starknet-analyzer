@@ -223,8 +223,15 @@ export class ContractCallAnalyzer {
             let singleStruct: StarknetArgument = {};
  
             for(const property of structAbi.properties!) {
-                singleStruct[property.name] = calldata[calldataIndex];
-                calldataIndex++;
+                // singleStruct[property.name] = calldata[calldataIndex];
+                // property.type
+                const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+                    property.type,
+                    { fullCalldataValues: calldata, startIndex: calldataIndex },
+
+                );
+                singleStruct[property.name] = argsValues;
+                calldataIndex = endIndex;
             }
             structArray.push(singleStruct);
         }

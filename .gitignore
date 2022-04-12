@@ -15,3 +15,5 @@ src/lib/helpers.js
 
 src/index.d.ts
 src/index.js
+
+tests
