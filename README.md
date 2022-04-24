@@ -115,7 +115,7 @@ Should be run on Linux
 
 ### How to intiialize: 
 
-```
+```typescript
 import { defaultProvider } from "starknet";
 import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
 
@@ -124,7 +124,7 @@ const contractAddr = "0x0000...e54";
 const contractCallAnalyzer = await new ContractCallAnalyzer(contractAddress).initialize(defaultProvider);
 ```
 
-```
+```typescript
 import { defaultProvider } from "starknet";
 import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
 
@@ -138,7 +138,7 @@ const contractCallAnalyzer = new ContractCallAnalyzer(contractAddr, structs, fun
 
 #### Function outputs (example: view functions)
 
-```
+```typescript
 import { defaultProvider } from "starknet";
 import { BigNumber } from "ethers";
 import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
@@ -186,7 +186,7 @@ See `TransactionCallAnalyzer.ts::getCalldataPerCall` for an example.
 
 #### Events:
 
-```
+```typescript
 import { defaultProvider } from "starknet";
 import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
 
@@ -224,7 +224,7 @@ console.log(events);
 
 ### How to use:
 
-```
+```typescript
 import { TransactionCallAnalyzer } from "starknet-analyzer/lib/analyzers/TransactionCallAnalyzer";
 import { defaultProvider } from "starknet";
 
@@ -254,7 +254,7 @@ const functionCalls = await transactionCallAnalyzer.getCalldataPerCallFromTx(tx)
 
 ### How to use:
 
-```
+```typescript
 import { defaultProvider } from "starknet";
 import { BlockAnalyzer } from "./analyzers/BlockAnalyzer";
 
