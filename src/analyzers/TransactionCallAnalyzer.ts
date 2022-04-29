@@ -1,13 +1,14 @@
 import { BigNumber } from "ethers";
 import {
     InvokeFunctionTransaction,
-    Provider
+    Provider,
+    RawCalldata
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
 import {
     FunctionCall,
-    CallArray,
+    CallArray
 } from "../types/organizedStarknet";
 import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
 
@@ -97,13 +98,7 @@ export class TransactionCallAnalyzer {
     }
 
     static _getCallArrayFromTx(tx: InvokeFunctionTransaction) {
-        let callArrayLength;
-        try {
-            callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
-        } catch(error) {
-            console.log("An error occured with this calldata", tx.calldata);
-            callArrayLength = 0;
-        }
+        let callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
         let callArray = [];
         // offset i by 1 so that is start at the `call_array` first value, and not at `call_array_len`
         // see the `__execute__` function's args at https://github.com/OpenZeppelin/cairo-contracts/blob/main/src/openzeppelin/account/Account.cairo

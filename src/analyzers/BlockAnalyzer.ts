@@ -45,8 +45,10 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
                     }
                 } catch(error) {}
 
-                functionCalls = await this.getCalldataPerCallFromTx(tx);
-                await sleep(2000);
+                try {
+                    functionCalls = await this.getCalldataPerCallFromTx(tx);
+                } catch(error) {}
+                await sleep(1000);
             }
             organizedTransactions.push({
                 hash: receipt.transaction_hash,
