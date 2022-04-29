@@ -192,7 +192,7 @@ export class ContractCallAnalyzer {
             const size = calldata.fullCalldataValues[calldata.startIndex - 1].toNumber();
             return size;
         } catch(error) {
-            console.log(error);
+            console.log("ContractAnalysze::getArraySizeFromCalldata - error", error);
             throw new Error(
                 `ContractAnalysze::getArraySizeFromCalldata - Error trying to get the previous calldata index and converting it into number (value: ${calldata.fullCalldataValues[calldata.startIndex - 1]})`
             );

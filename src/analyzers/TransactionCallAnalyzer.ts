@@ -81,7 +81,7 @@ export class TransactionCallAnalyzer {
      */
     static destructureFunctionCalldata(tx: InvokeFunctionTransaction) {
         if(!tx.calldata) {
-            console.log(tx);
+            console.log("TransactionAnalyzer::destructureFunctionCalldata - Calldata of tx is undefined, tx: ", tx);
             throw new Error(
                 `TransactionAnalyzer::destructureFunctionCalldata - Calldata of tx is undefined (calldata: ${tx.calldata})`
             );
