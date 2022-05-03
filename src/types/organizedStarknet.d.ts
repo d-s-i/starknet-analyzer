@@ -59,9 +59,7 @@ export type OrganizedCalldata = StarknetArgument | StarknetArgument[];
 export interface OrganizedEvent { 
     name: string, 
     transmitterContract: string, 
-    calldata: {
-        [key: string]: any;
-    } 
+    calldata: any[]
 }
 
 export interface OrganizedTransaction {
