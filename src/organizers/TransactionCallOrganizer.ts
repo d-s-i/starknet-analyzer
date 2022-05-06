@@ -10,7 +10,7 @@ import {
     FunctionCall,
     CallArray
 } from "../types/organizedStarknet";
-import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
+import { ContractCallAnalyzer } from "./ContractCallOrganizer";
 
 export class TransactionCallAnalyzer {
 

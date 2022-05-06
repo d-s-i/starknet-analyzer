@@ -72,3 +72,24 @@ export interface OrganizedTransaction {
     maxFee?: string,
     type: string
 }
+
+export interface OrganizedTransfer { from: string, to: string, value: BigNumber, hash: string, symbol: string, decimals: number }
+export type TransfersTree = { received: OrganizedTransfer[] | undefined, sent: OrganizedTransfer[] | undefined };
+export interface TransfersTreePerAccount { [address: string]: TransfersTree }
+
+export interface OrganizedSwap {
+    swapperAddress: string;
+    tokenIn: {
+        amount: BigNumber;
+        address: string;
+        symbol: string;
+        decimals: number;
+    };
+    tokenOut: {
+        amount: BigNumber;
+        address: string;
+        symbol: string;
+        decimals: number;
+    };
+}
+export interface SwappersTree { [address: string]: OrganizedSwap[] }

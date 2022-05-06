@@ -13,12 +13,12 @@ import {
     FunctionCall,
     OrganizedTransaction
 } from "../types/organizedStarknet";
-import { TransactionCallAnalyzer } from "./TransactionCallAnalyzer";
-import { ContractCallAnalyzer } from "./ContractCallAnalyzer";
+import { TransactionCallAnalyzer } from "./TransactionCallOrganizer";
 import { sleep } from "../helpers/helpers";
 
 export class BlockAnalyzer extends TransactionCallAnalyzer {
 
+    
     constructor(provider: Provider) {
         super(provider);
     }
@@ -28,7 +28,6 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
         const receipts = block.transaction_receipts as TransactionReceipt[];
 
         let organizedTransactions: OrganizedTransaction[] = [];
-        let contracts: { [key: string]: ContractCallAnalyzer } = {};
         for(const receipt of receipts) {
             if(transactions[receipt.transaction_index].type !== "INVOKE_FUNCTION") continue;
             const tx = transactions[receipt.transaction_index] as InvokeFunctionTransaction;
@@ -36,19 +35,15 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
             let events: OrganizedEvent[] = [];
             let functionCalls: FunctionCall[] | undefined;
             for(const event of receipt.events) {
-                if(!contracts[event.from_address]) {
-                    contracts[event.from_address] = await new ContractCallAnalyzer(event.from_address).initialize(this.provider);
-                }
+                const contractAnalyzer = await super.getContractAnalyzer(event.from_address);
                 try {
-                    const eventCalldata = contracts[event.from_address].organizeEvent(event);
+                    const eventCalldata = contractAnalyzer.organizeEvent(event);
                     if(eventCalldata) {
                         events.push(eventCalldata);
                     }
                 } catch(error) {}
 
-                try {
-                    functionCalls = await this.getCalldataPerCallFromTx(tx);
-                } catch(error) {}
+                functionCalls = await super.getCalldataPerCallFromTx(tx);
                 await sleep(1000);
             }
             organizedTransactions.push({
@@ -62,6 +57,9 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
         }
 
         return organizedTransactions;
-    
     }
+
+    // get contracts() {
+    //     return this._contracts;
+    // }
 }
