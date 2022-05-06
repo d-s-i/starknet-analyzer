@@ -12,7 +12,7 @@ import { Event, GetCodeResponse } from "../types/rawStarknet";
 import { Provider } from "starknet";
 import { getFullSelector } from "../helpers/helpers";
 
-export class ContractCallAnalyzer {
+export class ContractCallOrganizer {
 
     private _address: string;
     private _structs: OrganizedStructAbi | undefined;
@@ -64,7 +64,7 @@ export class ContractCallAnalyzer {
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
         }
-        const { events, functions, structs } = await ContractCallAnalyzer.getContractAbi(this.address, _provider);
+        const { events, functions, structs } = await ContractCallOrganizer.getContractAbi(this.address, _provider);
         this._structs = structs;
         this._functions = functions;
         this._events = events;

@@ -296,13 +296,13 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 ```
     import { defaultProvider } from "starknet";
-    import { BlockAnalyzer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
+    import { BlockOrganizer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
     import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
 
 
     const block = await defaultProvider.getBlock(blockNumber);
-    const blockAnalyzer = new BlockAnalyzer(provider);
-    const transactions = await blockAnalyzer.organizeTransactions(block);
+    const blockOrganizer = new BlockOrganizer(provider);
+    const transactions = await blockOrganizer.organizeTransactions(block);
 
     const transfersAnalyzer = new TransferAnalyzer(defaultProvider);
     const transfers = await transfersAnalyzer.analyzeTransfersInBlock(transactions);
@@ -314,13 +314,13 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 ```
     import { defaultProvider } from "starknet";
-    import { BlockAnalyzer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
-    import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
+    import { BlockOrganizer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
+    import { SwapAnalyzer } from "starknet-analyzer/lib/analyzers/SwapAnalyzer";
 
 
     const block = await defaultProvider.getBlock(blockNumber);
-    const blockAnalyzer = new BlockAnalyzer(provider);
-    const transactions = await blockAnalyzer.organizeTransactions(block);
+    const blockOrganizer = new BlockOrganizer(defaultProvider);
+    const transactions = await blockOrganizer.organizeTransactions(block);
 
     const swapAnalyzer = new SwapAnalyzer(defaultProvider);
     const swaps = await swapAnalyzer.analyzeSwapsInBlock(transactions);

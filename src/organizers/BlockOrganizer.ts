@@ -13,10 +13,10 @@ import {
     FunctionCall,
     OrganizedTransaction
 } from "../types/organizedStarknet";
-import { TransactionCallAnalyzer } from "./TransactionCallOrganizer";
+import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
 import { sleep } from "../helpers/helpers";
 
-export class BlockAnalyzer extends TransactionCallAnalyzer {
+export class BlockOrganizer extends TransactionCallOrganizer {
 
     
     constructor(provider: Provider) {

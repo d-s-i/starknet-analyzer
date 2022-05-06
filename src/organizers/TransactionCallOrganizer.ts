@@ -10,12 +10,12 @@ import {
     FunctionCall,
     CallArray
 } from "../types/organizedStarknet";
-import { ContractCallAnalyzer } from "./ContractCallOrganizer";
+import { ContractCallOrganizer } from "./ContractCallOrganizer";
 
-export class TransactionCallAnalyzer {
+export class TransactionCallOrganizer {
 
     private _provider: Provider;
-    private _contractCallOrganizer: { [address: string]: ContractCallAnalyzer };
+    private _contractCallOrganizer: { [address: string]: ContractCallOrganizer };
     
     constructor(provider: Provider) {
         this._provider = provider;
@@ -24,7 +24,7 @@ export class TransactionCallAnalyzer {
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
         try {
-            const { callArray, rawFnCalldata } = TransactionCallAnalyzer.destructureFunctionCalldata(transaction);
+            const { callArray, rawFnCalldata } = TransactionCallOrganizer.destructureFunctionCalldata(transaction);
             const functionCalls = await this.getCalldataPerCall(callArray, rawFnCalldata);
         
             return functionCalls as FunctionCall[];
@@ -65,7 +65,7 @@ export class TransactionCallAnalyzer {
     ) {
         // store contract to avoid fetching the same contract twice for the same function call
         if(!this.contractCallOrganizer[address]) {
-            this._contractCallOrganizer[address] = await new ContractCallAnalyzer(address).initialize(this.provider);
+            this._contractCallOrganizer[address] = await new ContractCallOrganizer(address).initialize(this.provider);
             return this.contractCallOrganizer[address];
         } else {
             return this.contractCallOrganizer[address];

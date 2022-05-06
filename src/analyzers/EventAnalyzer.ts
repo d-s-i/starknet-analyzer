@@ -1,6 +1,6 @@
 import { Provider } from "starknet";
 import { SwapAnalyzer } from "./SwapAnalyzer";
-import { BlockAnalyzer } from "../organizers/BlockOrganizer";
+import { BlockOrganizer } from "../organizers/BlockOrganizer";
 import { forceCast } from "../helpers/helpers";
 import { SwappersTree, TransfersTreePerAccount } from "../types/organizedStarknet";
 import { GetBlockResponse } from "../types/rawStarknet";
@@ -12,7 +12,7 @@ export class EventAnalyzer extends SwapAnalyzer {
     }
 
     async analyzeEventsInBlock(blockNumber: number) {
-        const blockAnalyzer = new BlockAnalyzer(this.provider);
+        const blockAnalyzer = new BlockOrganizer(this.provider);
         const _block = await this.provider.getBlock(blockNumber);
         const block = forceCast(_block) as GetBlockResponse;
         const transactions = await blockAnalyzer.organizeTransactions(block);
