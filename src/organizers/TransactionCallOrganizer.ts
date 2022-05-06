@@ -23,8 +23,8 @@ export class TransactionCallAnalyzer {
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
-        const { callArray, rawFnCalldata } = TransactionCallAnalyzer.destructureFunctionCalldata(transaction);
         try {
+            const { callArray, rawFnCalldata } = TransactionCallAnalyzer.destructureFunctionCalldata(transaction);
             const functionCalls = await this.getCalldataPerCall(callArray, rawFnCalldata);
         
             return functionCalls as FunctionCall[];
