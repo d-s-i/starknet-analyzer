@@ -35,7 +35,7 @@ export class BlockAnalyzer extends TransactionCallAnalyzer {
             let events: OrganizedEvent[] = [];
             let functionCalls: FunctionCall[] | undefined;
             for(const event of receipt.events) {
-                const contractAnalyzer = await super.getContractAnalyzer(event.from_address);
+                const contractAnalyzer = await super.getContractOrganizer(event.from_address);
                 try {
                     const eventCalldata = contractAnalyzer.organizeEvent(event);
                     if(eventCalldata) {

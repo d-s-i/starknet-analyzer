@@ -101,9 +101,18 @@
 
 # Contain
 
+Organizers: 
 1) `BlockAnalyzer` - Given a block, organize transactions with events and calldata to each funcions (if possible).
 2) `TransactionCallAnalyzer` - Given a transaction, can manipulate and organize the calldata and events. Used by BlockAnalyzer.
 3) `ContractCallAnalyzer` - Organize inputs, outputs and events of a function call for a given contract.
+
+Organizers take a calldata and organize it into a usable object.
+
+Analyzers:
+1) `QueryHelpers` - A simple class for recurring queries that store those recurring results. If a recurring query has already been made, it doesn't query it again and save you a node call.
+2) `TransferAnalyzer` - Given a block, return all transfers IN and OUT for every account that made a transfer within the block (as long as a standard Transfer event was triggered)
+3) `SwapAnalyzer` - Given a block, return all swaps made by an account within the block (as long as a known swap event was triggered). Currently support Mesh Finance and Alpha Road. Hoping to add more
+4) `EventAnalyzer` - Given a block, return all swaps and transfers made within the block. It is a little bit more efficient than `SwapAnalyzer` or `TransferAnalyzer` alone as it store more data in the `QueryHelper` class. Hoping to add Liquidation soon. 
 
 # Tips
 
@@ -111,27 +120,29 @@ Should be run on Linux
 
 # Examples
 
-## ContractCallAnalyzer
+# Organizers
+
+## ContractCallOrganizer
 
 ### How to intiialize: 
 
 ```
 import { defaultProvider } from "starknet";
-import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
+import { ContractCallOrganizer } from "starknet-analyzer/lib/organizers/ContractCallOrganizer";
 
 const contractAddr = "0x0000...e54";
 
-const contractCallAnalyzer = await new ContractCallAnalyzer(contractAddress).initialize(defaultProvider);
+const contractCallOrganizer = await new ContractCallOrganizer(contractAddress).initialize(defaultProvider);
 ```
 
 ```
 import { defaultProvider } from "starknet";
-import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
+import { ContractCallOrganizer } from "starknet-analyzer/lib/analyzers/ContractCallOrganizer";
 
 const contractAddr = "0x0000...e54";
 
-const { events, functions, structs } = await ContractCallAnalyzer.getContractAbi(contractAddr, defaultProvider);
-const contractCallAnalyzer = new ContractCallAnalyzer(contractAddr, structs, functions, events);
+const { events, functions, structs } = await ContractCallOrganizer.getContractAbi(contractAddr, defaultProvider);
+const contractCallOrganizer = new ContractCallOrganizer(contractAddr, structs, functions, events);
 ```
 
 ### How to use:
@@ -141,7 +152,7 @@ const contractCallAnalyzer = new ContractCallAnalyzer(contractAddr, structs, fun
 ```
 import { defaultProvider } from "starknet";
 import { BigNumber } from "ethers";
-import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
+import { ContractCallOrganizer } from "starknet-analyzer/lib/organizers/ContractCallOrganizer";
 
 const contractAddr = "0x0000...e54";
 const entrypoint = "get_amounts_out";
@@ -153,9 +164,9 @@ const { result: rawAmountsOut } = await defaultProvider.callContract({
 
 const rawAmountsOutBN = rawAmountsOut.map((rawPool: any) => BigNumber.from(rawPool));
 
-const contractCallAnalyzer = await new ContractCallAnalyzer(contractAddress).initialize(defaultProvider);
+const contractCallOrganizer = await new ContractCallOrganizer(contractAddress).initialize(defaultProvider);
 
-const { subcalldata: amountsOut } = contractCallAnalyzer.organizeFunctionOutput(
+const { subcalldata: amountsOut } = contractCallOrganizer.organizeFunctionOutput(
     getFullSelector(entrypoint),
     rawAmountsOutBN
 );
@@ -188,19 +199,19 @@ See `TransactionCallAnalyzer.ts::getCalldataPerCall` for an example.
 
 ```
 import { defaultProvider } from "starknet";
-import { ContractCallAnalyzer } from "starknet-analyzer/lib/analyzers/ContractCallAnalyzer";
+import { ContractCallOrganizer } from "starknet-analyzer/lib/analyzers/ContractCallOrganizer";
 
 const contractAddr = "0x0000...e54";
 
-const contractCallAnalyzer = await new ContractCallAnalyzer(contractAddress).initialize(defaultProvider);
+const contractCallOrganizer = await new ContractCallOrganizer(contractAddress).initialize(defaultProvider);
 
 const block = await defaultProvider.getBlock(1145);
 const receipt = block.transaction_receipts[0] as TransactionReceipt; // pick a random receipt
 
 let events: OrganizedEvent[] = [];
 for(const event of receipt.events) {
-    const contractCallAnalyzer = await this.getContractAnalyzer(event.from_address);
-    const eventCalldata = await contractCallAnalyzer.organizeEvent(event);
+    const contractCallAnalyzer = await this.getContractOrganizer(event.from_address);
+    const eventCalldata = await contractCallOrganizer.organizeEvent(event);
     if(eventCalldata) {
         events.push(eventCalldata);
     }
@@ -220,19 +231,19 @@ console.log(events);
 */
 ```
 
-## TransactionCallAnalyzer
+## TransactionCallOrganizer
 
 ### How to use:
 
 ```
-import { TransactionCallAnalyzer } from "starknet-analyzer/lib/analyzers/TransactionCallAnalyzer";
+import { TransactionCallOrganizer } from "starknet-analyzer/lib/organizers/TransactionCallOrganizer";
 import { defaultProvider } from "starknet";
 
 const block = await defaultProvider.getBlock(99874);
 const transaction = block.transactions[0] as InvokeFunctionTransaction;
 
-const transactionCallAnalyzer = new TransactionCallAnalyzer(defaultProvider);
-const functionCalls = await transactionCallAnalyzer.getCalldataPerCallFromTx(tx);
+const transactionCallOrganizer = new TransactionCallOrganizer(defaultProvider);
+const functionCalls = await transactionCallOrganizer.getCalldataPerCallFromTx(tx);
 
 /*
     return something like:
@@ -250,17 +261,17 @@ const functionCalls = await transactionCallAnalyzer.getCalldataPerCallFromTx(tx)
 */
 ```
 
-## BlockAnalyzer
+## BlockOrganizer
 
 ### How to use:
 
 ```
 import { defaultProvider } from "starknet";
-import { BlockAnalyzer } from "./analyzers/BlockAnalyzer";
+import { BlockOrganizer } from "./organizers/BlockOrganizer";
 
-const blockAnalyzer = new BlockAnalyzer(defaultProvider);
+const blockOrganizer = new BlockOrganizer(defaultProvider);
 const block = await defaultProvider.getBlock(blockNumber);
-const transactions = await blockAnalyzer.organizeTransactions(block);
+const transactions = await blockOrganizer.organizeTransactions(block);
 
 /*
     return something like:
@@ -275,4 +286,54 @@ const transactions = await blockAnalyzer.organizeTransactions(block);
         type: string
     }
 */
+```
+
+# Analyzers
+
+## TransferAnalyzer
+
+### How to use:
+
+```
+    import { defaultProvider } from "starknet";
+    import { BlockAnalyzer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
+    import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
+
+
+    const block = await defaultProvider.getBlock(blockNumber);
+    const blockAnalyzer = new BlockAnalyzer(provider);
+    const transactions = await blockAnalyzer.organizeTransactions(block);
+
+    const transfersAnalyzer = new TransferAnalyzer(defaultProvider);
+    const transfers = await transfersAnalyzer.analyzeTransfersInBlock(transactions);
+```
+
+## SwapAnalyzer
+
+### How to use:
+
+```
+    import { defaultProvider } from "starknet";
+    import { BlockAnalyzer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
+    import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
+
+
+    const block = await defaultProvider.getBlock(blockNumber);
+    const blockAnalyzer = new BlockAnalyzer(provider);
+    const transactions = await blockAnalyzer.organizeTransactions(block);
+
+    const swapAnalyzer = new SwapAnalyzer(defaultProvider);
+    const swaps = await swapAnalyzer.analyzeSwapsInBlock(transactions);
+```
+
+## EventAnalyzer
+
+### How to use:
+
+```
+    import { defaultProvider } from "starknet";
+    import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
+
+    const eventAnalyzer = new EventAnalyzer(defaultProvider);
+    const { swaps, transfers } = await eventAnalyzer.analyzeEventsInBlock(132974);
 ```

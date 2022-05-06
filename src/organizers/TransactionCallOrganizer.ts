@@ -15,11 +15,11 @@ import { ContractCallAnalyzer } from "./ContractCallOrganizer";
 export class TransactionCallAnalyzer {
 
     private _provider: Provider;
-    private _contractCallAnalyzers: { [address: string]: ContractCallAnalyzer };
+    private _contractCallOrganizer: { [address: string]: ContractCallAnalyzer };
     
     constructor(provider: Provider) {
         this._provider = provider;
-        this._contractCallAnalyzers = {};
+        this._contractCallOrganizer = {};
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
@@ -40,9 +40,9 @@ export class TransactionCallAnalyzer {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallAnalyzer = await this.getContractAnalyzer(call.to.toHexString());
+            const contractCallOrganizer = await this.getContractOrganizer(call.to.toHexString());
     
-            const { subcalldata, endIndex } = contractCallAnalyzer.organizeFunctionInput(
+            const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
                 call.selector.toHexString(), 
                 fullTxCalldata, 
                 rawCalldataIndex, 
@@ -52,7 +52,7 @@ export class TransactionCallAnalyzer {
             }
             rawCalldataIndex = endIndex;
             functionCalls.push({
-                name: contractCallAnalyzer.getFunctionAbiFromSelector(call.selector.toHexString()).name,
+                name: contractCallOrganizer.getFunctionAbiFromSelector(call.selector.toHexString()).name,
                 to: call.to,
                 calldata: subcalldata
             });
@@ -60,15 +60,15 @@ export class TransactionCallAnalyzer {
         return functionCalls;
     }
     
-    async getContractAnalyzer(
+    async getContractOrganizer(
         address: string
     ) {
         // store contract to avoid fetching the same contract twice for the same function call
-        if(!this.contractCallAnalyzers[address]) {
-            this.contractCallAnalyzers[address] = await new ContractCallAnalyzer(address).initialize(this.provider);
-            return this.contractCallAnalyzers[address];
+        if(!this.contractCallOrganizer[address]) {
+            this._contractCallOrganizer[address] = await new ContractCallAnalyzer(address).initialize(this.provider);
+            return this.contractCallOrganizer[address];
         } else {
-            return this.contractCallAnalyzers[address];
+            return this.contractCallOrganizer[address];
         }
     
     }
@@ -128,7 +128,7 @@ export class TransactionCallAnalyzer {
         return this._provider;
     }
 
-    get contractCallAnalyzers() {
-        return this._contractCallAnalyzers;
+    get contractCallOrganizer() {
+        return this._contractCallOrganizer;
     }
 }
