@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetArgument, OrganizedEvent, StarknetContractCode } from "../types/organizedStarknet";
 import { Event } from "../types/rawStarknet";
 import { Provider } from "starknet";
-export declare class ContractCallAnalyzer {
+export declare class ContractCallOrganizer {
     private _address;
     private _structs;
     private _functions;

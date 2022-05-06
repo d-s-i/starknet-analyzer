@@ -297,7 +297,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 ```
     import { defaultProvider } from "starknet";
     import { BlockOrganizer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
-    import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
+    import { TransferAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
 
 
     const block = await defaultProvider.getBlock(blockNumber);
