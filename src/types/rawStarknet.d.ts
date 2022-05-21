@@ -33,6 +33,19 @@ export declare type TransactionReceipt = {
   events: Event[];
 };
 
+export declare type InvokeFunctionTransaction = {
+  type: 'INVOKE_FUNCTION';
+  contract_address: string;
+  signature?: Signature;
+  transaction_hash: string;
+  entry_point_type?: EntryPointType;
+  entry_point_selector: string;
+  calldata?: RawCalldata;
+  nonce?: BigNumberish;
+  max_fee?: BigNumberish;
+  version?: BigNumberish;
+}
+
 export declare type GetCodeResponse = {
   bytecode: string[];
   abi: Abi;
