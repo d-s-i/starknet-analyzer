@@ -3,10 +3,10 @@ import { FunctionAbi, AbiEntry } from "starknet/types/index";
 import { EventAbi } from "./rawStarknet";
 
 export interface ContractInfos {
-     [key: string]: { 
-         transactionCount: number, 
-         type: string 
-        } 
+    [key: string]: { 
+        transactionCount: number, 
+        type: string 
+    } 
 }
 
 export interface AccountCallArray {
@@ -51,7 +51,13 @@ export interface CallArray {
 export interface FunctionCall {
     name: string;
     to: BigNumber;
-    calldata: any;
+    calldata: OrganizedArgument[];
+}
+
+export interface OrganizedArgument {
+    name: string,
+    type: string,
+    value: any
 }
 
 export type OrganizedCalldata = StarknetArgument | StarknetArgument[];
