@@ -18,7 +18,6 @@ import { sleep } from "../helpers/helpers";
 
 export class BlockOrganizer extends TransactionCallOrganizer {
 
-    
     constructor(provider: Provider) {
         super(provider);
     }

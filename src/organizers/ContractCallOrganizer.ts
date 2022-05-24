@@ -9,7 +9,7 @@ import {
     StarknetContractCode
 } from "../types/organizedStarknet";
 import { Event, GetCodeResponse } from "../types/rawStarknet";
-import { Provider } from "starknet";
+import { defaultProvider, Provider } from "starknet";
 import { getFullSelector } from "../helpers/helpers";
 
 export class ContractCallOrganizer {
@@ -35,6 +35,31 @@ export class ContractCallOrganizer {
     }
 
     static async getContractAbi(contractAddress: string, provider: Provider) {
+
+        let { functions, structs, events } = await this._organizeContractAbi(contractAddress, provider);
+
+        const proxyEntryPoint = "get_implementation";
+        const getImplementationSelector = getFullSelector(proxyEntryPoint);
+        if(functions[getImplementationSelector]) {
+            const { result: [implementationAddress] } = await defaultProvider.callContract({
+                contractAddress,
+                entrypoint: proxyEntryPoint
+            })
+            const { 
+                functions: implementationFunctions,
+                structs: implementationStructs,
+                events: implementationEvents
+            } = await this._organizeContractAbi(implementationAddress, provider);
+
+            functions = { ...functions, ...implementationFunctions };
+            structs = { ...structs, ...implementationStructs };
+            events = { ...events, ...implementationEvents };
+        }
+        
+        return { functions, structs, events } as StarknetContractCode;
+    }
+
+    static async _organizeContractAbi(contractAddress: string, provider: Provider) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
     
         let functions: OrganizedFunctionAbi = {};
