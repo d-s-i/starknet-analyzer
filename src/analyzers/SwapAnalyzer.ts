@@ -40,6 +40,7 @@ export class SwapAnalyzer extends TransferAnalyzer {
         } else if(factoryAddr === this.ALPHA_ROAD_FACTORY) { // Alpha Road Implementation
             decodedSwap = await this.interpretAlphaRoadSwap(event.calldata);
         } else {
+            console.log("Unknown router addr")
             decodedSwap = await this.interpretAlphaRoadSwap(event.calldata);
         }
         await this.sleep(1000);

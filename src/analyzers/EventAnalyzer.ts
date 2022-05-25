@@ -7,12 +7,15 @@ import { GetBlockResponse } from "../types/rawStarknet";
 
 export class EventAnalyzer extends SwapAnalyzer {
 
-    constructor(provider: Provider) {
+    private _msBetweenCallQueries: number;
+
+    constructor(provider: Provider, msBetweenCallQueries: number) {
         super(provider);
+        this._msBetweenCallQueries = msBetweenCallQueries;
     }
 
     async analyzeEventsInBlock(blockNumber: number) {
-        const blockAnalyzer = new BlockOrganizer(this.provider);
+        const blockAnalyzer = new BlockOrganizer(this.provider, this._msBetweenCallQueries);
         const _block = await this.provider.getBlock(blockNumber);
         const block = forceCast(_block) as GetBlockResponse;
         const transactions = await blockAnalyzer.organizeTransactions(block);

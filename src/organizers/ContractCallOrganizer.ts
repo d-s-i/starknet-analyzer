@@ -37,14 +37,10 @@ export class ContractCallOrganizer {
     static async getContractAbi(contractAddress: string, provider: Provider) {
 
         let { functions, structs, events } = await this._organizeContractAbi(contractAddress, provider);
-        console.log("functions, structs, events", functions, structs, events);
-
-        console.log("------------------------");
 
         const proxyEntryPoint = "get_implementation";
         const getImplementationSelector = getFullSelector(proxyEntryPoint);
         if(functions[getImplementationSelector]) {
-            console.log("contract is a proxy ", contractAddress);
             const { result: [implementationAddress] } = await defaultProvider.callContract({
                 contractAddress,
                 entrypoint: proxyEntryPoint
@@ -56,16 +52,10 @@ export class ContractCallOrganizer {
             } = await this._organizeContractAbi(implementationAddress, provider);
 
             functions = { ...functions, ...implementationFunctions };
-            // console.log("implementationFunctions", implementationFunctions)
             structs = { ...structs, ...implementationStructs };
-            // console.log("implementationStructs", implementationStructs)
             events = { ...events, ...implementationEvents };
-            // console.log("implementationEvents", implementationEvents)
         }
         
-        console.log("functions", functions);
-        console.log("structs", structs);
-        console.log("events", events);
         return { functions, structs, events } as StarknetContractCode;
     }
 

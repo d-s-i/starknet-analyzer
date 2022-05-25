@@ -269,7 +269,7 @@ const functionCalls = await transactionCallOrganizer.getCalldataPerCallFromTx(tx
 import { defaultProvider } from "starknet";
 import { BlockOrganizer } from "./organizers/BlockOrganizer";
 
-const blockOrganizer = new BlockOrganizer(defaultProvider);
+const blockOrganizer = new BlockOrganizer(defaultProvider, 500);
 const block = await defaultProvider.getBlock(blockNumber);
 const transactions = await blockOrganizer.organizeTransactions(block);
 
@@ -301,7 +301,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 
     const block = await defaultProvider.getBlock(blockNumber);
-    const blockOrganizer = new BlockOrganizer(defaultProvider);
+    const blockOrganizer = new BlockOrganizer(defaultProvider, 500);
     const transactions = await blockOrganizer.organizeTransactions(block);
 
     const transfersAnalyzer = new TransferAnalyzer(defaultProvider);
@@ -319,7 +319,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 
     const block = await defaultProvider.getBlock(blockNumber);
-    const blockOrganizer = new BlockOrganizer(defaultProvider);
+    const blockOrganizer = new BlockOrganizer(defaultProvider, 500);
     const transactions = await blockOrganizer.organizeTransactions(block);
 
     const swapAnalyzer = new SwapAnalyzer(defaultProvider);
@@ -334,6 +334,6 @@ const transactions = await blockOrganizer.organizeTransactions(block);
     import { defaultProvider } from "starknet";
     import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
 
-    const eventAnalyzer = new EventAnalyzer(defaultProvider);
+    const eventAnalyzer = new EventAnalyzer(defaultProvider, 500);
     const { swaps, transfers } = await eventAnalyzer.analyzeEventsInBlock(132974);
 ```

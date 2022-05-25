@@ -4,7 +4,6 @@ import {
 } from "starknet";
 
 import { 
-    Event,
     GetBlockResponse,
     TransactionReceipt
 } from "../types/rawStarknet";
@@ -18,8 +17,11 @@ import { sleep } from "../helpers/helpers";
 
 export class BlockOrganizer extends TransactionCallOrganizer {
 
-    constructor(provider: Provider) {
+    private _msBetweenCallQueries: number
+    
+    constructor(provider: Provider, msBetweenCallQueries: number) {
         super(provider);
+        this._msBetweenCallQueries = msBetweenCallQueries;
     }
 
     async organizeTransactions(block: GetBlockResponse) {
@@ -42,9 +44,10 @@ export class BlockOrganizer extends TransactionCallOrganizer {
                     }
                 } catch(error) {}
 
-                functionCalls = await super.getCalldataPerCallFromTx(tx);
-                await sleep(1000);
             }
+            functionCalls = await super.getCalldataPerCallFromTx(tx);
+            await sleep(this._msBetweenCallQueries);
+
             organizedTransactions.push({
                 hash: receipt.transaction_hash,
                 events,
@@ -57,8 +60,4 @@ export class BlockOrganizer extends TransactionCallOrganizer {
 
         return organizedTransactions;
     }
-
-    // get contracts() {
-    //     return this._contracts;
-    // }
 }

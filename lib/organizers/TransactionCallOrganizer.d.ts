@@ -4,7 +4,7 @@ import { FunctionCall, CallArray } from "../types/organizedStarknet";
 import { ContractCallOrganizer } from "./ContractCallOrganizer";
 export declare class TransactionCallOrganizer {
     private _provider;
-    private _contractCallOrganizer;
+    private _contractCallOrganizers;
     constructor(provider: Provider);
     getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[] | undefined>;
     getCalldataPerCall(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
@@ -39,7 +39,7 @@ export declare class TransactionCallOrganizer {
     }[];
     static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number): BigNumber[];
     get provider(): Provider;
-    get contractCallOrganizer(): {
+    get contractCallOrganizers(): {
         [address: string]: ContractCallOrganizer;
     };
 }

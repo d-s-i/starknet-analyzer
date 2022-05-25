@@ -1,8 +1,7 @@
 import { BigNumber } from "ethers";
 import {
     InvokeFunctionTransaction,
-    Provider,
-    RawCalldata
+    Provider
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
@@ -15,11 +14,11 @@ import { ContractCallOrganizer } from "./ContractCallOrganizer";
 export class TransactionCallOrganizer {
 
     private _provider: Provider;
-    private _contractCallOrganizer: { [address: string]: ContractCallOrganizer };
+    private _contractCallOrganizers: { [address: string]: ContractCallOrganizer };
     
     constructor(provider: Provider) {
         this._provider = provider;
-        this._contractCallOrganizer = {};
+        this._contractCallOrganizers = {};
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
@@ -64,11 +63,11 @@ export class TransactionCallOrganizer {
         address: string
     ) {
         // store contract to avoid fetching the same contract twice for the same function call
-        if(!this.contractCallOrganizer[address]) {
-            this._contractCallOrganizer[address] = await new ContractCallOrganizer(address).initialize(this.provider);
-            return this.contractCallOrganizer[address];
+        if(!this.contractCallOrganizers[address]) {
+            this._contractCallOrganizers[address] = await new ContractCallOrganizer(address).initialize(this.provider);
+            return this.contractCallOrganizers[address];
         } else {
-            return this.contractCallOrganizer[address];
+            return this.contractCallOrganizers[address];
         }
     
     }
@@ -100,7 +99,7 @@ export class TransactionCallOrganizer {
     static _getCallArrayFromTx(tx: InvokeFunctionTransaction) {
         let callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
         let callArray = [];
-        // offset i by 1 so that is start at the `call_array` first value, and not at `call_array_len`
+        // offset i by 1 so that it start at the `call_array` first value, and not at `call_array_len`
         // see the `__execute__` function's args at https://github.com/OpenZeppelin/cairo-contracts/blob/main/src/openzeppelin/account/Account.cairo
         for(let i = 1; i < callArrayLength * callArrayStructLength; i = i + callArrayStructLength) {
             callArray.push({
@@ -128,7 +127,7 @@ export class TransactionCallOrganizer {
         return this._provider;
     }
 
-    get contractCallOrganizer() {
-        return this._contractCallOrganizer;
+    get contractCallOrganizers() {
+        return this._contractCallOrganizers;
     }
 }
