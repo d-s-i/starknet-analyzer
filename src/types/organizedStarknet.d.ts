@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
-import { FunctionAbi, AbiEntry } from "starknet/types/index";
-import { EventAbi } from "./rawStarknet";
+import { AbiEntry } from "starknet/types/index";
+import { EventAbi, FunctionAbi } from "./rawStarknet";
 
 export interface ContractInfos {
     [key: string]: { 
@@ -19,7 +19,7 @@ export interface AccountCallArray {
 export interface StarknetContractCode {
     functions: OrganizedFunctionAbi,
     structs: OrganizedStructAbi,
-    events: OrganizedEventAbi
+    events: OrganizedEventAbi,
 }
 
 export interface OrganizedFunctionAbi { 
@@ -65,7 +65,7 @@ export type OrganizedCalldata = StarknetArgument | StarknetArgument[];
 export interface OrganizedEvent { 
     name: string, 
     transmitterContract: string, 
-    calldata: any[]
+    calldata: OrganizedArgument[]
 }
 
 export interface OrganizedTransaction {

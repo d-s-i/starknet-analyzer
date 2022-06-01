@@ -9,27 +9,20 @@ import {
     FunctionCall,
     CallArray
 } from "../types/organizedStarknet";
-import { ContractCallOrganizer } from "./ContractCallOrganizer";
+// import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerStorage";
+import  { ReceiptOrganizer } from "./ReceiptOrganizer";
 
-export class TransactionCallOrganizer {
+export class TransactionCallOrganizer extends ReceiptOrganizer {
 
-    private _provider: Provider;
-    private _contractCallOrganizers: { [address: string]: ContractCallOrganizer };
-    
     constructor(provider: Provider) {
-        this._provider = provider;
-        this._contractCallOrganizers = {};
+        super(provider);
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
-        try {
             const { callArray, rawFnCalldata } = TransactionCallOrganizer.destructureFunctionCalldata(transaction);
             const functionCalls = await this.getCalldataPerCall(callArray, rawFnCalldata);
         
             return functionCalls as FunctionCall[];
-        } catch(error) {
-            return undefined;
-        }
     }
 
     async getCalldataPerCall(
@@ -39,7 +32,7 @@ export class TransactionCallOrganizer {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallOrganizer = await this.getContractOrganizer(call.to.toHexString());
+            const contractCallOrganizer = await super.getContractOrganizer(call.to.toHexString());
     
             const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
                 call.selector.toHexString(), 
@@ -57,19 +50,6 @@ export class TransactionCallOrganizer {
             });
         }
         return functionCalls;
-    }
-    
-    async getContractOrganizer(
-        address: string
-    ) {
-        // store contract to avoid fetching the same contract twice for the same function call
-        if(!this.contractCallOrganizers[address]) {
-            this._contractCallOrganizers[address] = await new ContractCallOrganizer(address).initialize(this.provider);
-            return this.contractCallOrganizers[address];
-        } else {
-            return this.contractCallOrganizers[address];
-        }
-    
     }
     
     /**
@@ -121,13 +101,5 @@ export class TransactionCallOrganizer {
         }
 
         return fnCalldata;
-    }
-
-    get provider() {
-        return this._provider;
-    }
-
-    get contractCallOrganizers() {
-        return this._contractCallOrganizers;
     }
 }

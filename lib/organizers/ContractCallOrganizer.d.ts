@@ -59,13 +59,18 @@ export declare class ContractCallOrganizer {
         }[];
         endIndex: number;
     };
-    getFunctionAbiFromSelector(functionSelector: string): import("starknet/types").FunctionAbi;
+    getFunctionAbiFromSelector(functionSelector: string): import("../types/rawStarknet").FunctionAbi;
     getStructAbiFromStructType(type: string): import("../types/organizedStarknet").StarknetStruct;
     getEventAbiFromKey(key: string): import("../types/rawStarknet").EventAbi;
     get address(): string;
     get structs(): OrganizedStructAbi | undefined;
     get functions(): OrganizedFunctionAbi | undefined;
     get events(): OrganizedEventAbi | undefined;
+    get abi(): {
+        functions: OrganizedFunctionAbi | undefined;
+        events: OrganizedEventAbi | undefined;
+        structs: OrganizedStructAbi | undefined;
+    };
     get provider(): Provider | undefined;
 }
 //# sourceMappingURL=ContractCallOrganizer.d.ts.map

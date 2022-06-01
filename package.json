@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist",
   "scripts": {
-    "test": "npx ts-mocha tests/index.test.ts --timeout 200000",
+    "test": "npx ts-mocha ./**/**/*.test.ts --timeout 200000",
     "build": "tsc -p ."
   },
   "repository": {

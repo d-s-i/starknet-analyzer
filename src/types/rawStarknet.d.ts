@@ -2,7 +2,6 @@ import {
   Transaction,
   BlockNumber,
   Status,
-  FunctionAbi,
   StructAbi
 } from "starknet"
 
@@ -56,6 +55,14 @@ export declare type EventAbi = {
   keys: string[],
   name: string,
   type: 'event'
+};
+
+export declare type FunctionAbi = {
+  inputs: AbiEntry[];
+  name: string;
+  outputs: AbiEntry[];
+  stateMutability?: 'view';
+  type: 'function' | 'constructor' | "l1_handler";
 };
 
 export declare type Abi = Array<FunctionAbi | StructAbi | EventAbi>;

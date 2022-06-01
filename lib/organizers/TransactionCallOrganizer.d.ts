@@ -1,12 +1,10 @@
 import { BigNumber } from "ethers";
 import { InvokeFunctionTransaction, Provider } from "starknet";
 import { FunctionCall, CallArray } from "../types/organizedStarknet";
-import { ContractCallOrganizer } from "./ContractCallOrganizer";
-export declare class TransactionCallOrganizer {
-    private _provider;
-    private _contractCallOrganizers;
+import { ReceiptOrganizer } from "./ReceiptOrganizer";
+export declare class TransactionCallOrganizer extends ReceiptOrganizer {
     constructor(provider: Provider);
-    getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[] | undefined>;
+    getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[]>;
     getCalldataPerCall(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
         name: string;
         to: BigNumber;
@@ -14,7 +12,6 @@ export declare class TransactionCallOrganizer {
             [key: string]: any;
         } | import("../types/organizedStarknet").StarknetArgument[];
     }[]>;
-    getContractOrganizer(address: string): Promise<ContractCallOrganizer>;
     /**
      * @dev - Transactions have:
      * 1) An array of contracts to call
@@ -38,9 +35,5 @@ export declare class TransactionCallOrganizer {
         dataLen: BigNumber;
     }[];
     static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number): BigNumber[];
-    get provider(): Provider;
-    get contractCallOrganizers(): {
-        [address: string]: ContractCallOrganizer;
-    };
 }
 //# sourceMappingURL=TransactionCallOrganizer.d.ts.map

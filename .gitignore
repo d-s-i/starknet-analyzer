@@ -17,3 +17,6 @@ src/index.d.ts
 src/index.js
 
 tests
+scripts
+
+errors.txt

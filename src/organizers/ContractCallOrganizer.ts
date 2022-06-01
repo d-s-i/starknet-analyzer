@@ -10,7 +10,7 @@ import {
 } from "../types/organizedStarknet";
 import { Event, GetCodeResponse } from "../types/rawStarknet";
 import { defaultProvider, Provider } from "starknet";
-import { getFullSelector } from "../helpers/helpers";
+import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
 
 export class ContractCallOrganizer {
 
@@ -38,12 +38,15 @@ export class ContractCallOrganizer {
 
         let { functions, structs, events } = await this._organizeContractAbi(contractAddress, provider);
 
-        const proxyEntryPoint = "get_implementation";
-        const getImplementationSelector = getFullSelector(proxyEntryPoint);
-        if(functions[getImplementationSelector]) {
+        const proxyEntryPoints = ["get_implementation", "getImplementation", "implementation"];
+        const getImplementationSelectors = proxyEntryPoints.map(entrypoint => getFullSelectorFromName(entrypoint));
+        const getImplementationIndex = getImplementationSelectors.findIndex(getImplementationSelector => {
+            return Object.keys(functions).includes(getImplementationSelector);
+        });
+        if(getImplementationIndex !== -1) {
             const { result: [implementationAddress] } = await defaultProvider.callContract({
                 contractAddress,
-                entrypoint: proxyEntryPoint
+                entrypoint: proxyEntryPoints[getImplementationIndex]
             })
             const { 
                 functions: implementationFunctions,
@@ -56,6 +59,7 @@ export class ContractCallOrganizer {
             events = { ...events, ...implementationEvents };
         }
         
+        
         return { functions, structs, events } as StarknetContractCode;
     }
 
@@ -66,10 +70,14 @@ export class ContractCallOrganizer {
         let events: OrganizedEventAbi = {};
         let structs: OrganizedStructAbi = {};
         for(const item of abi) {
-            if(item.type === "function") {
-                const _name = getFullSelector(item.name)
+            if(
+                item.type === "function" || 
+                item.type === "l1_handler" ||
+                item.type === "constructor"
+            ) {
+                const _name = getFullSelectorFromName(item.name);
                 functions[_name] = item;
-            }
+            } 
             if(item.type === "struct") {
                 structs[item.name] = {
                     size: item.size,
@@ -77,7 +85,7 @@ export class ContractCallOrganizer {
                 };
             }
             if(item.type === "event") {
-                const _name = getFullSelector(item.name)
+                const _name = getFullSelectorFromName(item.name);
                 events[_name] = item;
             }
         }
@@ -111,7 +119,7 @@ export class ContractCallOrganizer {
         const rawResBN = rawRes.map((rawPool: any) => BigNumber.from(rawPool));
     
         const { subcalldata } = this.organizeFunctionOutput(
-            getFullSelector(entrypoint),
+            getFullSelectorFromName(entrypoint),
             rawResBN
         ) as any;
 
@@ -169,8 +177,7 @@ export class ContractCallOrganizer {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }
 
-
-        const eventAbi = this.getEventAbiFromKey(event.keys[0]);
+        const eventAbi = this.getEventAbiFromKey(getFullSelector(event.keys[0]));
         
         let dataIndex = 0;
         let eventArgs = [];
@@ -340,8 +347,9 @@ export class ContractCallOrganizer {
         const event = this.events[key];
 
         if(!event) {
+            // console.log(this.events);
             throw new Error(
-                `ContractAnalyzer::getEventFromKey - No events specified for this key (key: ${key})`
+                `ContractAnalyzer::getEventFromKey - On contract ${this.address}, no events specified for this key (key: ${key})`
             );
         }
         
@@ -362,6 +370,14 @@ export class ContractCallOrganizer {
 
     get events() {
         return this._events;
+    }
+
+    get abi() {
+        return {
+            functions: this.functions,
+            events: this.events,
+            structs: this.structs
+        };
     }
 
     get provider() {

@@ -1,12 +1,16 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { getSelectorFromName } from "starknet/utils/hash";
 
 export const sleep = async function(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const getFullSelector = function(entrypoint: string) {
+export const getFullSelectorFromName = function(entrypoint: string) {
     return BigNumber.from(getSelectorFromName(entrypoint)).toHexString();
+}
+
+export const getFullSelector = function(selector: BigNumberish) {
+    return BigNumber.from(selector).toHexString();
 }
 
 export const uint256ToBN = function(num: { low: string, high: string }) {
