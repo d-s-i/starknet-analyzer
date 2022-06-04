@@ -59,7 +59,6 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * @returns an organized object of a transaction calldata
      */
     static destructureFunctionCalldata(tx: InvokeFunctionTransaction) {
-        console.log("tx.calldata", tx.calldata);
         if(!tx.calldata) {
             console.log("TransactionAnalyzer::destructureFunctionCalldata - Calldata of tx is undefined, tx: ", tx);
             throw new Error(

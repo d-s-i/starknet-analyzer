@@ -352,7 +352,6 @@ export class ContractCallOrganizer {
         const event = this.events[key];
 
         if(!event) {
-            // console.log(this.events);
             throw new Error(
                 `ContractAnalyzer::getEventFromKey - On contract ${this.address}, no events specified for this key (key: ${key})`
             );
