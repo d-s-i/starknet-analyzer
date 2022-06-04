@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers";
 import { defaultProvider, Provider } from "starknet";
+import { BigNumberish } from "starknet/utils/number";
 
 import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
 
@@ -108,7 +109,7 @@ export class ContractCallOrganizer {
         return this;
     }
 
-    async callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: StandardProvider<Provider>) {
+    async callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: StandardProvider<Provider>) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
