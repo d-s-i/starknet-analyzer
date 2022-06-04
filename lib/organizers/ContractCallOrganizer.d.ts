@@ -1,18 +1,19 @@
 import { BigNumber } from "ethers";
+import { Provider } from "starknet";
 import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetArgument, OrganizedEvent, StarknetContractCode } from "../types/organizedStarknet";
 import { Event } from "../types/rawStarknet";
-import { Provider } from "starknet";
+import { StandardProvider } from "../types";
 export declare class ContractCallOrganizer {
     private _address;
     private _structs;
     private _functions;
     private _events;
     private _provider;
-    constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: Provider);
-    static getContractAbi(contractAddress: string, provider: Provider): Promise<StarknetContractCode>;
-    static _organizeContractAbi(contractAddress: string, provider: Provider): Promise<StarknetContractCode>;
-    initialize(provider?: Provider): Promise<this>;
-    callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: Provider): Promise<any>;
+    constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: StandardProvider<Provider>);
+    static getContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    static _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    initialize(provider?: StandardProvider<Provider>): Promise<this>;
+    callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: StandardProvider<Provider>): Promise<any>;
     organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
         subcalldata: {
             [key: string]: any;
@@ -71,6 +72,6 @@ export declare class ContractCallOrganizer {
         events: OrganizedEventAbi | undefined;
         structs: OrganizedStructAbi | undefined;
     };
-    get provider(): Provider | undefined;
+    get provider(): StandardProvider<Provider> | undefined;
 }
 //# sourceMappingURL=ContractCallOrganizer.d.ts.map

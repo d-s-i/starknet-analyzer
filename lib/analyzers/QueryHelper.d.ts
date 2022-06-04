@@ -1,10 +1,11 @@
 import { Provider } from "starknet";
+import { StandardProvider } from "../types";
 export declare class QueryHelper {
     private _provider;
     private _tokens;
     private _pairs;
     private _factoriesAddresses;
-    constructor(provider: Provider);
+    constructor(provider: StandardProvider<Provider>);
     query(contractAddress: string, entrypoint: string, calldata?: any[]): Promise<string[] | undefined>;
     getFactoryAddr(lpTokenAddress: string): Promise<string | undefined>;
     getSymbol(_tokenAddress: string): Promise<string | undefined>;
@@ -20,7 +21,7 @@ export declare class QueryHelper {
     checkResultIsDefined(results: any[]): void;
     sleep(ms: number): Promise<unknown>;
     _query(contractAddress: string, entrypoint: string, calldata?: any[]): Promise<string[]>;
-    get provider(): Provider;
+    get provider(): StandardProvider<Provider>;
     get tokens(): {
         [tokenAddress: string]: {
             symbol: string;

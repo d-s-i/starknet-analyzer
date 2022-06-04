@@ -1,9 +1,10 @@
 import { BigNumber } from "ethers";
 import { InvokeFunctionTransaction, Provider } from "starknet";
 import { FunctionCall, CallArray } from "../types/organizedStarknet";
+import { StandardProvider } from "../types";
 import { ReceiptOrganizer } from "./ReceiptOrganizer";
 export declare class TransactionCallOrganizer extends ReceiptOrganizer {
-    constructor(provider: Provider);
+    constructor(provider: StandardProvider<Provider>);
     getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[]>;
     getCalldataPerCall(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
         name: string;
