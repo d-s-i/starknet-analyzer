@@ -1,7 +1,10 @@
 import { Provider } from "starknet";
+
 import { SwapAnalyzer } from "./SwapAnalyzer";
 import { BlockOrganizer } from "../organizers/BlockOrganizer";
 import { forceCast } from "../helpers/helpers";
+
+import { StandardProvider } from "../types";
 import { SwappersTree, TransfersTreePerAccount } from "../types/organizedStarknet";
 import { GetBlockResponse } from "../types/rawStarknet";
 
@@ -9,7 +12,7 @@ export class EventAnalyzer extends SwapAnalyzer {
 
     private _msBetweenCallQueries: number;
 
-    constructor(provider: Provider, msBetweenCallQueries: number) {
+    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries: number) {
         super(provider);
         this._msBetweenCallQueries = msBetweenCallQueries;
     }

@@ -1,12 +1,14 @@
 import { Provider } from "starknet";
 import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
+import { StandardProvider } from "../types";
+
 export class ContractCallOrganizerStorage {
 
-    private _provider: Provider;
+    private _provider: StandardProvider<Provider>;
     private _contractCallOrganizers: { [address: string]: ContractCallOrganizer };
 
-    constructor(provider: Provider) {
+    constructor(provider: StandardProvider<Provider>) {
         this._contractCallOrganizers = {};
         this._provider = provider;
     }

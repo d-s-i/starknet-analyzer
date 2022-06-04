@@ -1,7 +1,6 @@
 import { 
     Provider, 
-    InvokeFunctionTransaction,
-    defaultProvider
+    InvokeFunctionTransaction
 } from "starknet";
 
 import { 
@@ -13,6 +12,7 @@ import {
     FunctionCall,
     OrganizedTransaction
 } from "../types/organizedStarknet";
+import { StandardProvider } from "../types";
 import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
 import { sleep } from "../helpers/helpers";
 
@@ -20,7 +20,7 @@ export class BlockOrganizer extends TransactionCallOrganizer {
 
     private _msBetweenCallQueries: number;
     
-    constructor(provider: Provider, msBetweenCallQueries?: number) {
+    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries?: number) {
         super(provider);
         this._msBetweenCallQueries = msBetweenCallQueries || 0;
     }
@@ -35,33 +35,24 @@ export class BlockOrganizer extends TransactionCallOrganizer {
             const tx = transactions[receipt.transaction_index] as InvokeFunctionTransaction;
             
             let events: OrganizedEvent[] = [];
-            let functionCalls: FunctionCall[] | undefined;
-            // for(const event of receipt.events) {
-            //     const contractAnalyzer = await super.getContractOrganizer(event.from_address);
-            //     try {
-            //         const eventCalldata = contractAnalyzer.organizeEvent(event);
-            //         if(eventCalldata) {
-            //             events.push(eventCalldata);
-            //         }
-            //     } catch(error) {}
-
-            // }
+            let functionCalls: FunctionCall[] | undefined = [];
             try {
                 events = await super.getEventsFromReceipt(receipt);
             } catch(error) {
-                console.log("----------- ERROR -----------");
-                console.log(`EVENT ERROR on tx ${receipt.transaction_hash}`, error);
+                // console.log("----------- ERROR -----------");
+                // console.log(`EVENT ERROR on tx ${receipt.transaction_hash}`, error);
 
-                console.log("----------- EVENTS -----------");
-                console.log(receipt.events);
-
-                // console.log("----------- RAW ABI -----------");
-                // console.log(await defaultProvider.getCode())
+                // console.log("----------- EVENTS -----------");
+                // console.log(receipt.events);
             }
             try {
                 functionCalls = await super.getCalldataPerCallFromTx(tx);
             } catch(error) {
+                // console.log("----------- ERROR -----------");
                 // console.log(`FUNCTION ERROR on tx ${receipt.transaction_hash}`, error);
+
+                // console.log("----------- CALLDATA -----------");
+                // console.log(tx.calldata);
             }
             this._msBetweenCallQueries && await sleep(this._msBetweenCallQueries);
 

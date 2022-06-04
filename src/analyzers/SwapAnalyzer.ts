@@ -1,16 +1,17 @@
 import { Provider } from "starknet";
 import { decodeShortString } from "starknet/dist/utils/shortString";
 import { uint256ToBN } from "../helpers/helpers";
-
-import { OrganizedSwap, SwappersTree, OrganizedEvent, OrganizedTransaction } from "../types/organizedStarknet";
 import { TransferAnalyzer } from "./TransferAnalyzer";
+
+import { StandardProvider } from "../types";
+import { OrganizedSwap, SwappersTree, OrganizedEvent, OrganizedTransaction } from "../types/organizedStarknet";
 
 export class SwapAnalyzer extends TransferAnalyzer {
 
     private _swappersPerBlock: { [blockNumber: number]: SwappersTree };
     private _ALPHA_ROAD_FACTORY = "0x373c71f077b96cbe7a57225cd503d29cadb0056ed741a058094234d82de2f9";
     
-    constructor(provider: Provider) {
+    constructor(provider: StandardProvider<Provider>) {
         super(provider);
         this._swappersPerBlock = {};
     }

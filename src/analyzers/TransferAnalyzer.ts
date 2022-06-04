@@ -1,5 +1,8 @@
 import { BigNumber } from "ethers";
 import { Provider } from "starknet";
+
+import { QueryHelper } from "./QueryHelper";
+
 import { 
     OrganizedEvent, 
     OrganizedTransaction, 
@@ -7,12 +10,12 @@ import {
     TransfersTree, 
     TransfersTreePerAccount 
 } from "../types/organizedStarknet";
-import { QueryHelper } from "./QueryHelper";
+import { StandardProvider } from "../types";
 
 export class TransferAnalyzer extends QueryHelper {
     private _transfersPerBlock: { [blockNumber: string]: TransfersTreePerAccount };
 
-    constructor(provider: Provider) {
+    constructor(provider: StandardProvider<Provider>) {
         super(provider);
         this._transfersPerBlock = {};
     }

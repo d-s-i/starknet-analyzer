@@ -1,4 +1,8 @@
 import { BigNumber } from "ethers";
+import { defaultProvider, Provider } from "starknet";
+
+import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
+
 import { 
     OrganizedEventAbi, 
     OrganizedFunctionAbi, 
@@ -9,8 +13,7 @@ import {
     StarknetContractCode
 } from "../types/organizedStarknet";
 import { Event, GetCodeResponse } from "../types/rawStarknet";
-import { defaultProvider, Provider } from "starknet";
-import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
+import { StandardProvider } from "../types";
 
 export class ContractCallOrganizer {
 
@@ -18,14 +21,14 @@ export class ContractCallOrganizer {
     private _structs: OrganizedStructAbi | undefined;
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
-    private _provider: Provider | undefined;
+    private _provider: StandardProvider<Provider> | undefined;
 
     constructor(
         contractAddress: string,
         structs?: OrganizedStructAbi, 
         functions?: OrganizedFunctionAbi, 
         events?: OrganizedEventAbi,
-        provider?: Provider
+        provider?: StandardProvider<Provider>
     ) {
         this._address = contractAddress;
         this._structs = structs;
@@ -34,7 +37,7 @@ export class ContractCallOrganizer {
         this._provider = provider;
     }
 
-    static async getContractAbi(contractAddress: string, provider: Provider) {
+    static async getContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
 
         let { functions, structs, events } = await this._organizeContractAbi(contractAddress, provider);
 
@@ -63,7 +66,7 @@ export class ContractCallOrganizer {
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    static async _organizeContractAbi(contractAddress: string, provider: Provider) {
+    static async _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
     
         let functions: OrganizedFunctionAbi = {};
@@ -92,7 +95,7 @@ export class ContractCallOrganizer {
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    async initialize(provider?: Provider) {
+    async initialize(provider?: StandardProvider<Provider>) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
@@ -105,7 +108,7 @@ export class ContractCallOrganizer {
         return this;
     }
 
-    async callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: Provider) {
+    async callViewFn(entrypoint: string, calldata?: BigNumber[], provider?: StandardProvider<Provider>) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
@@ -173,6 +176,7 @@ export class ContractCallOrganizer {
     organizeEvent(event: Event) {
         // TODO: make another for loop for each keys in case many events are triggered
         // (never saw this case yet after analysing hundreds of blocks)
+        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d but idk how to interpret it yet
         if(event.keys.length > 1) {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }
