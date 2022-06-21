@@ -10,7 +10,8 @@ import {
 import {
     OrganizedEvent,
     FunctionCall,
-    OrganizedTransaction
+    OrganizedTransaction,
+    ContractCallOrganizerMap
 } from "../types/organizedStarknet";
 import { StandardProvider } from "../types";
 import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
@@ -20,8 +21,8 @@ export class BlockOrganizer extends TransactionCallOrganizer {
 
     private _msBetweenCallQueries: number;
     
-    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries?: number) {
-        super(provider);
+    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries?: number, contractCallOrganizer?: ContractCallOrganizerMap) {
+        super(provider, contractCallOrganizer);
         this._msBetweenCallQueries = msBetweenCallQueries || 0;
     }
 

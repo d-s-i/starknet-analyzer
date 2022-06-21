@@ -2,15 +2,17 @@ import { Provider } from "starknet";
 import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
 import { StandardProvider } from "../types";
+import { ContractCallOrganizerMap } from "../types/organizedStarknet";
 
 export class ContractCallOrganizerStorage {
 
     private _provider: StandardProvider<Provider>;
-    private _contractCallOrganizers: { [address: string]: ContractCallOrganizer };
+    private _contractCallOrganizers: ContractCallOrganizerMap;
 
-    constructor(provider: StandardProvider<Provider>) {
+    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
         this._contractCallOrganizers = {};
         this._provider = provider;
+        this._contractCallOrganizers = contractCallOrganizer || {};
     }
 
     async getContractOrganizer(address: string) {

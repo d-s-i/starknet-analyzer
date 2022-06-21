@@ -1,17 +1,15 @@
 import { BigNumber } from "ethers";
 import { InvokeFunctionTransaction, Provider } from "starknet";
-import { FunctionCall, CallArray } from "../types/organizedStarknet";
+import { FunctionCall, CallArray, ContractCallOrganizerMap } from "../types/organizedStarknet";
 import { StandardProvider } from "../types";
 import { ReceiptOrganizer } from "./ReceiptOrganizer";
 export declare class TransactionCallOrganizer extends ReceiptOrganizer {
-    constructor(provider: StandardProvider<Provider>);
+    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap);
     getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[]>;
     getCalldataPerCall(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
-        name: string;
+        name: any;
         to: BigNumber;
-        calldata: {
-            [key: string]: any;
-        } | import("../types/organizedStarknet").StarknetArgument[];
+        calldata: any;
     }[]>;
     /**
      * @dev - Transactions have:

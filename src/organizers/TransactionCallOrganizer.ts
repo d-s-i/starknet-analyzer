@@ -7,15 +7,16 @@ import {
 import { callArrayStructLength } from "../helpers/constants";
 import {
     FunctionCall,
-    CallArray
+    CallArray,
+    ContractCallOrganizerMap
 } from "../types/organizedStarknet";
 import { StandardProvider } from "../types";
 import  { ReceiptOrganizer } from "./ReceiptOrganizer";
 
 export class TransactionCallOrganizer extends ReceiptOrganizer {
 
-    constructor(provider: StandardProvider<Provider>) {
-        super(provider);
+    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
+        super(provider, contractCallOrganizer);
     }
     
     async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {

@@ -99,3 +99,5 @@ export interface OrganizedSwap {
     };
 }
 export interface SwappersTree { [address: string]: OrganizedSwap[] }
+
+export interface ContractCallOrganizerMap { [address: string]: ContractCallOrganizer }

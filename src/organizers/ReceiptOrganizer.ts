@@ -4,14 +4,14 @@ import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerSt
 
 import { StandardProvider } from "../types";
 import { TransactionReceipt } from "../types/rawStarknet";
-import { OrganizedEvent } from "../types/organizedStarknet";
+import { OrganizedEvent, ContractCallOrganizerMap } from "../types/organizedStarknet";
 
 export class ReceiptOrganizer extends ContractCallOrganizerStorage {
 
     private _organizedEvents: OrganizedEvent[];
     
-    constructor(provider: StandardProvider<Provider>) {
-        super(provider);
+    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
+        super(provider, contractCallOrganizer);
         this._organizedEvents = [];
     }
     

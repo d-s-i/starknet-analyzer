@@ -51,16 +51,18 @@ export class ContractCallOrganizer {
             const { result: [implementationAddress] } = await defaultProvider.callContract({
                 contractAddress,
                 entrypoint: proxyEntryPoints[getImplementationIndex]
-            })
-            const { 
-                functions: implementationFunctions,
-                structs: implementationStructs,
-                events: implementationEvents
-            } = await this._organizeContractAbi(implementationAddress, provider);
-
-            functions = { ...functions, ...implementationFunctions };
-            structs = { ...structs, ...implementationStructs };
-            events = { ...events, ...implementationEvents };
+            });
+            try {
+                const { 
+                    functions: implementationFunctions,
+                    structs: implementationStructs,
+                    events: implementationEvents
+                } = await this._organizeContractAbi(implementationAddress, provider);
+    
+                functions = { ...functions, ...implementationFunctions };
+                structs = { ...structs, ...implementationStructs };
+                events = { ...events, ...implementationEvents };
+            } catch(error) {  }
         }
         
         
@@ -69,6 +71,9 @@ export class ContractCallOrganizer {
 
     static async _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
+        if(Object.keys(abi).length === 0) {
+            throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
+        }
     
         let functions: OrganizedFunctionAbi = {};
         let events: OrganizedEventAbi = {};
