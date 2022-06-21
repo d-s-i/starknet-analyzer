@@ -5,6 +5,7 @@ import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerSt
 import { StandardProvider } from "../types";
 import { TransactionReceipt } from "../types/rawStarknet";
 import { OrganizedEvent, ContractCallOrganizerMap } from "../types/organizedStarknet";
+import { getFullSelector } from "../helpers/helpers";
 
 export class ReceiptOrganizer extends ContractCallOrganizerStorage {
 
@@ -17,7 +18,7 @@ export class ReceiptOrganizer extends ContractCallOrganizerStorage {
     
     async getEventsFromReceipt(receipt: TransactionReceipt) {
         for(const _event of receipt.events) {
-            const contractCallOrganizer = await super.getContractOrganizer(_event.from_address);
+            const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(_event.from_address));
             const eventCalldata = contractCallOrganizer.organizeEvent(_event);
             if(eventCalldata) {
                 this._organizedEvents.push(eventCalldata);

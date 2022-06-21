@@ -12,6 +12,7 @@ import {
 } from "../types/organizedStarknet";
 import { StandardProvider } from "../types";
 import  { ReceiptOrganizer } from "./ReceiptOrganizer";
+import { getFullSelector } from "../helpers/helpers";
 
 export class TransactionCallOrganizer extends ReceiptOrganizer {
 
@@ -33,7 +34,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallOrganizer = await super.getContractOrganizer(call.to.toHexString());
+            const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(call.to));
     
             const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
                 call.selector.toHexString(), 
