@@ -315,7 +315,7 @@ export class ContractCallOrganizer {
     getFunctionAbiFromSelector(functionSelector: string) {
         if(!this.functions) {
             throw new Error(
-                `ContractAnalyzer::getFunctionFromSelector - No functions declared for this ContractAnalyzer instance (functions: ${this.functions})`
+                `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions declared for this ContractAnalyzer instance (functions: ${this.functions})`
             );
         }
 
@@ -323,7 +323,7 @@ export class ContractCallOrganizer {
 
         if(!fn) {
             throw new Error(
-                `ContractAnalyzer::getFunctionFromSelector - No functions matching this selector (selector: ${functionSelector})`
+                `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions matching this selector (selector: ${functionSelector})`
             );
         }
 
@@ -333,7 +333,7 @@ export class ContractCallOrganizer {
     getStructAbiFromStructType(type: string) {
         if(!this.structs) {
             throw new Error(
-                `ContractAnalyzer::getStructFromStructs - No struct specified for this instance (structs: ${this.structs})`
+                `ContractAnalyzer::getStructFromStructs - On contract ${this.address} no struct specified for this instance (structs: ${this.structs})`
             );
         }
         
@@ -341,7 +341,7 @@ export class ContractCallOrganizer {
         
         if(!struct) {
             throw new Error(
-                `ContractAnalyzer::getStructFromStructs - No struct specified for this type (structType: ${type})`
+                `ContractAnalyzer::getStructFromStructs - On contract ${this.address} no struct specified for this type (structType: ${type})`
             );
         }
         return struct;
@@ -350,7 +350,7 @@ export class ContractCallOrganizer {
     getEventAbiFromKey(key: string) {
         if(!this.events) {
             throw new Error(
-                `ContractAnalyzer::getEventFromKey - No events specified for this instance (events: ${this.events})`
+                `ContractAnalyzer::getEventFromKey - On contract ${this.address} no events specified for this instance (events: ${this.events})`
             );
         }
 
