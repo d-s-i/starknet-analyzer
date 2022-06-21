@@ -18,11 +18,13 @@ export class ReceiptOrganizer extends ContractCallOrganizerStorage {
     
     async getEventsFromReceipt(receipt: TransactionReceipt) {
         for(const _event of receipt.events) {
-            const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(_event.from_address));
-            const eventCalldata = contractCallOrganizer.organizeEvent(_event);
-            if(eventCalldata) {
-                this._organizedEvents.push(eventCalldata);
-            }
+            try {
+                const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(_event.from_address));
+                const eventCalldata = contractCallOrganizer.organizeEvent(_event);
+                if(eventCalldata) {
+                    this._organizedEvents.push(eventCalldata);
+                }
+            } catch(error) {  }
         }
         return  this.organizedEvents;
     }
