@@ -3,6 +3,7 @@ import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
 import { StandardProvider } from "../types";
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
+import { getFullSelector } from "./helpers";
 
 export class ContractCallOrganizerStorage {
 
@@ -12,7 +13,13 @@ export class ContractCallOrganizerStorage {
     constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
         this._contractCallOrganizers = {};
         this._provider = provider;
-        this._contractCallOrganizers = contractCallOrganizer || {};
+        if(contractCallOrganizer) {
+            for(const [key, obj] of Object.entries(contractCallOrganizer)) {
+                this._contractCallOrganizers[getFullSelector(key)] = obj;
+            }
+        } else {
+            this._contractCallOrganizers = {};
+        }
     }
 
     async getContractOrganizer(address: string) {
