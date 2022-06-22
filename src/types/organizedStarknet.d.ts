@@ -76,7 +76,7 @@ export interface OrganizedTransaction {
     entrypointType?: string,
     functionCalls?: OrganizedCalldata,
     maxFee?: string,
-    type: string
+    type: "ORGANIZED_INVOKE_FUNCTION"
 }
 
 export interface OrganizedTransfer { from: string, to: string, value: BigNumber, hash: string, symbol: string, decimals: number }

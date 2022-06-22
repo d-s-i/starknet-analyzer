@@ -63,7 +63,7 @@ export class BlockOrganizer extends TransactionCallOrganizer {
                 functionCalls,
                 origin: tx.contract_address,
                 entrypointSelector: tx.entry_point_selector,
-                type: tx.type
+                type: "ORGANIZED_INVOKE_FUNCTION"
             });
         }
 
