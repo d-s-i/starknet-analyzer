@@ -5,7 +5,7 @@ export declare class ContractCallOrganizerStorage {
     private _provider;
     private _contractCallOrganizers;
     constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap);
-    getContractOrganizer(address: string): Promise<ContractCallOrganizer>;
+    getContractOrganizer(_address: string): Promise<ContractCallOrganizer>;
     get contractCallOrganizers(): ContractCallOrganizerMap;
     get provider(): StandardProvider<Provider>;
 }

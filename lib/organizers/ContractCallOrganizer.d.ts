@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { Provider } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
-import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetArgument, OrganizedEvent, StarknetContractCode } from "../types/organizedStarknet";
+import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetArgument, OrganizedCalldata, OrganizedEvent, StarknetContractCode } from "../types/organizedStarknet";
 import { Event } from "../types/rawStarknet";
 import { StandardProvider } from "../types";
 export declare class ContractCallOrganizer {
@@ -16,15 +16,11 @@ export declare class ContractCallOrganizer {
     initialize(provider?: StandardProvider<Provider>): Promise<this>;
     callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: StandardProvider<Provider>): Promise<any>;
     organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
-        subcalldata: {
-            [key: string]: any;
-        } | StarknetArgument[];
+        subcalldata: OrganizedCalldata;
         endIndex: number;
     };
     organizeFunctionOutput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
-        subcalldata: {
-            [key: string]: any;
-        } | StarknetArgument[];
+        subcalldata: OrganizedCalldata;
         endIndex: number;
     };
     organizeEvent(event: Event): OrganizedEvent;
@@ -32,9 +28,7 @@ export declare class ContractCallOrganizer {
         fullCalldataValues: BigNumber[];
         startIndex: number;
     }): {
-        argsValues: {
-            [key: string]: any;
-        };
+        argsValues: StarknetArgument;
         endIndex: number;
     };
     _getArraySizeFromCalldata(calldata: {
@@ -50,18 +44,14 @@ export declare class ContractCallOrganizer {
         endIndex: number;
     };
     _getStructFromCalldata(type: string, calldata: BigNumber[], startIndex: number): {
-        structCalldata: {
-            [key: string]: any;
-        };
+        structCalldata: StarknetArgument;
         endIndex: number;
     };
     _getStructArrayFromCalldata(type: string, calldata: BigNumber[], startIndex: number, size: number): {
-        structArray: {
-            [key: string]: any;
-        }[];
+        structArray: StarknetArgument[];
         endIndex: number;
     };
-    getFunctionAbiFromSelector(functionSelector: string): import("../types/rawStarknet").FunctionAbi;
+    getFunctionAbiFromSelector(_functionSelector: string): import("../types/rawStarknet").FunctionAbi;
     getStructAbiFromStructType(type: string): import("../types/organizedStarknet").StarknetStruct;
     getEventAbiFromKey(key: string): import("../types/rawStarknet").EventAbi;
     get address(): string;
