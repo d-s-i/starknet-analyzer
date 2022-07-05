@@ -39,7 +39,7 @@ export interface StarknetStruct {
     properties: (AbiEntry & { offset: number; })[] | []
 }
 
-export type StarknetArgument = { [key: string]: any } | BigNumber;
+export type StarknetArgument = { [key: string]: any };
 
 export interface CallArray {
     to: BigNumber,

@@ -22,7 +22,8 @@ export class ContractCallOrganizerStorage {
         }
     }
 
-    async getContractOrganizer(address: string) {
+    async getContractOrganizer(_address: string) {
+        const address = getFullSelector(_address);
         // store contract to avoid fetching the same contract twice for the same function call
         if(!this.contractCallOrganizers[address]) {
             this._contractCallOrganizers[address] = await new ContractCallOrganizer(address).initialize(this.provider);

@@ -312,7 +312,8 @@ export class ContractCallOrganizer {
         return { structArray, endIndex: calldataIndex };
     }
 
-    getFunctionAbiFromSelector(functionSelector: string) {
+    getFunctionAbiFromSelector(_functionSelector: string) {
+        const functionSelector = getFullSelector(_functionSelector);
         if(!this.functions) {
             throw new Error(
                 `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions declared for this ContractAnalyzer instance (functions: ${this.functions})`
