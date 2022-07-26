@@ -231,7 +231,7 @@ export class ContractCallOrganizer {
 
     _getArraySizeFromCalldata(calldata: { fullCalldataValues: BigNumber[], startIndex: number }) {
         try {
-            const size = BigNumber.from(calldata.fullCalldataValues[calldata.startIndex - 1]).toNumber();
+            const size = BigNumber.from(calldata.fullCalldataValues[calldata.startIndex - 1].toString()).toNumber();
             return size;
         } catch(error) {
             console.log("ContractAnalysze::getArraySizeFromCalldata - error", error);
