@@ -74,7 +74,7 @@ export interface OrganizedTransaction {
     origin: string,
     entrypointSelector: string,
     entrypointType?: string,
-    functionCalls?: OrganizedCalldata,
+    functionCalls?: FunctionCall[],
     maxFee?: string,
     type: "ORGANIZED_INVOKE_FUNCTION"
 }
