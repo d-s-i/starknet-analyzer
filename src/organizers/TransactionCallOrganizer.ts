@@ -78,6 +78,11 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         return { callArray, rawFnCalldata, nonce };
     }
 
+    /**
+     * @notice The call array is an array containing information about the call being made
+     * @param tx: An invoke function transaction as you get when you query a tx from the starknetjs defaultProvider
+     * @returns The Call array (being { to, selector, dataOffset, dataLen })
+     */
     static _getCallArrayFromTx(tx: InvokeFunctionTransaction) {
         let callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
         let callArray = [];
@@ -95,6 +100,12 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         return callArray;
     }
 
+    /**
+     * @notice A starknet transaction calldata is made of ([CallArray, Calldata]) with the CallArray containing data about the call and the Calldata being the calldata of the call
+     * @param tx: An invoke function transaction as you get when you query a tx from the starknetjs defaultProvider
+     * @param offset: A number telling where we should start reading the calldata (in case there are many calls and many calldata for example)
+     * @returns The calldata of the given call
+     */
     static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number) {
         const calldataLength = BigNumber.from(tx.calldata![offset]).toNumber();
         let fnCalldata = [];
@@ -103,5 +114,14 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         }
 
         return fnCalldata;
+    }
+
+    static getValueFromOrganizedFunctionCallForFunctionName(fnName: string, { calldata }: FunctionCall) {
+        for(const organizedCalldata of calldata) {
+            if(organizedCalldata.name === fnName) {
+                return organizedCalldata.value;
+            }
+        }
+        throw new Error(`PlayerAnalyzer::_getCalldataFromFunctionName - No calldata found for this function name in calldata (functionName: ${fnName})`);
     }
 }
