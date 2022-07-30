@@ -116,12 +116,12 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         return fnCalldata;
     }
 
-    static getValueFromOrganizedFunctionCallForFunctionName(fnName: string, { calldata }: FunctionCall) {
+    static getSpecificArgFromFunctionCall(argName: string, { calldata }: FunctionCall) {
         for(const organizedCalldata of calldata) {
-            if(organizedCalldata.name === fnName) {
+            if(organizedCalldata.name === argName) {
                 return organizedCalldata.value;
             }
         }
-        throw new Error(`PlayerAnalyzer::_getCalldataFromFunctionName - No calldata found for this function name in calldata (functionName: ${fnName})`);
+        throw new Error(`PlayerAnalyzer::_getCalldataFromFunctionName - No calldata found for this function name in calldata (functionName: ${argName})`);
     }
 }

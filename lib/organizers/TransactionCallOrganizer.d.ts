@@ -45,6 +45,6 @@ export declare class TransactionCallOrganizer extends ReceiptOrganizer {
      * @returns The calldata of the given call
      */
     static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number): BigNumber[];
-    static getValueFromOrganizedFunctionCallForFunctionName(fnName: string, { calldata }: FunctionCall): any;
+    static getSpecificArgFromFunctionCall(argName: string, { calldata }: FunctionCall): any;
 }
 //# sourceMappingURL=TransactionCallOrganizer.d.ts.map
