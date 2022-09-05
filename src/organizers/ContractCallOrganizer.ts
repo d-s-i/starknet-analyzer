@@ -62,7 +62,9 @@ export class ContractCallOrganizer {
                 functions = { ...functions, ...implementationFunctions };
                 structs = { ...structs, ...implementationStructs };
                 events = { ...events, ...implementationEvents };
-            } catch(error) {  }
+            } catch(error) { 
+                console.log(error);
+            }
         }
         
         
@@ -71,6 +73,7 @@ export class ContractCallOrganizer {
 
     static async _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
+
         if(Object.keys(abi).length === 0) {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
         }
@@ -182,7 +185,7 @@ export class ContractCallOrganizer {
     organizeEvent(event: Event) {
         // TODO: make another for loop for each keys in case many events are triggered
         // (never saw this case yet after analysing hundreds of blocks)
-        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d but idk how to interpret it yet
+        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d (on goerli) but idk how to interpret it yet
         if(event.keys.length > 1) {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }

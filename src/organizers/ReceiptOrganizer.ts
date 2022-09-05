@@ -23,7 +23,9 @@ export class ReceiptOrganizer extends ContractCallOrganizerStorage {
                 if(eventCalldata) {
                     _organizedEvents.push(eventCalldata);
                 }
-            } catch(error) {  }
+            } catch(error) { 
+                console.log(error);
+            }
         }
         return  _organizedEvents;
     }
