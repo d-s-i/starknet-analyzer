@@ -13,7 +13,7 @@ import {
     OrganizedEvent,
     StarknetContractCode
 } from "../types/organizedStarknet";
-import { Event, GetCodeResponse } from "../types/rawStarknet";
+import { Abi, Event, GetCodeResponse } from "../types/rawStarknet";
 import { StandardProvider } from "../types";
 
 export class ContractCallOrganizer {
@@ -39,9 +39,9 @@ export class ContractCallOrganizer {
     }
 
     // need to change this because `getCode` doesn't work for implementation from proxies
-    static async getContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
+    static async getFullContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
 
-        let { functions, structs, events } = await this.organizeContractAbi(contractAddress, provider);
+        let { functions, structs, events } = await this.organizeContractAbiFromAddress(contractAddress, provider);
 
         const proxyEntryPoints = ["get_implementation", "getImplementation", "implementation"];
         const getImplementationSelectors = proxyEntryPoints.map(entrypoint => getFullSelectorFromName(entrypoint));
@@ -58,7 +58,7 @@ export class ContractCallOrganizer {
                     functions: implementationFunctions,
                     structs: implementationStructs,
                     events: implementationEvents
-                } = await this.organizeContractAbi(implementationAddress, provider);
+                } = await this.organizeContractAbiFromAddress(implementationAddress, provider);
     
                 functions = { ...functions, ...implementationFunctions };
                 structs = { ...structs, ...implementationStructs };
@@ -72,13 +72,18 @@ export class ContractCallOrganizer {
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    static async organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
+    static async organizeContractAbiFromAddress(contractAddress: string, provider: StandardProvider<Provider>) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
 
         if(Object.keys(abi).length === 0) {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
         }
     
+        return this.organizeContractAbiFromAbi(abi);
+
+    }
+
+    static organizeContractAbiFromAbi(abi: Abi) {
         let functions: OrganizedFunctionAbi = {};
         let events: OrganizedEventAbi = {};
         let structs: OrganizedStructAbi = {};
@@ -110,7 +115,7 @@ export class ContractCallOrganizer {
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
         }
-        const { events, functions, structs } = await ContractCallOrganizer.getContractAbi(this.address, _provider);
+        const { events, functions, structs } = await ContractCallOrganizer.getFullContractAbi(this.address, _provider);
         this._structs = structs;
         this._functions = functions;
         this._events = events;

@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { Provider } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
 import { OrganizedEventAbi, OrganizedFunctionAbi, OrganizedStructAbi, StarknetArgument, OrganizedCalldata, OrganizedEvent, StarknetContractCode } from "../types/organizedStarknet";
-import { Event } from "../types/rawStarknet";
+import { Abi, Event } from "../types/rawStarknet";
 import { StandardProvider } from "../types";
 export declare class ContractCallOrganizer {
     private _address;
@@ -11,8 +11,9 @@ export declare class ContractCallOrganizer {
     private _events;
     private _provider;
     constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: StandardProvider<Provider>);
-    static getContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
-    static organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    static getFullContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    static organizeContractAbiFromAddress(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    static organizeContractAbiFromAbi(abi: Abi): StarknetContractCode;
     initialize(provider?: StandardProvider<Provider>): Promise<this>;
     callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: StandardProvider<Provider>): Promise<any>;
     organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
