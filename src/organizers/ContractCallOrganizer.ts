@@ -38,9 +38,10 @@ export class ContractCallOrganizer {
         this._provider = provider;
     }
 
+    // need to change this because `getCode` doesn't work for implementation from proxies
     static async getContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
 
-        let { functions, structs, events } = await this._organizeContractAbi(contractAddress, provider);
+        let { functions, structs, events } = await this.organizeContractAbi(contractAddress, provider);
 
         const proxyEntryPoints = ["get_implementation", "getImplementation", "implementation"];
         const getImplementationSelectors = proxyEntryPoints.map(entrypoint => getFullSelectorFromName(entrypoint));
@@ -57,7 +58,7 @@ export class ContractCallOrganizer {
                     functions: implementationFunctions,
                     structs: implementationStructs,
                     events: implementationEvents
-                } = await this._organizeContractAbi(implementationAddress, provider);
+                } = await this.organizeContractAbi(implementationAddress, provider);
     
                 functions = { ...functions, ...implementationFunctions };
                 structs = { ...structs, ...implementationStructs };
@@ -71,7 +72,7 @@ export class ContractCallOrganizer {
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    static async _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
+    static async organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
         const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
 
         if(Object.keys(abi).length === 0) {
@@ -185,7 +186,7 @@ export class ContractCallOrganizer {
     organizeEvent(event: Event) {
         // TODO: make another for loop for each keys in case many events are triggered
         // (never saw this case yet after analysing hundreds of blocks)
-        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d (on goerli) but idk how to interpret it yet
+        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d (on goerli) but it's unclear how to interpret it
         if(event.keys.length > 1) {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }

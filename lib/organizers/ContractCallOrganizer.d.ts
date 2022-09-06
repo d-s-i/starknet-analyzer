@@ -12,7 +12,7 @@ export declare class ContractCallOrganizer {
     private _provider;
     constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: StandardProvider<Provider>);
     static getContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
-    static _organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
+    static organizeContractAbi(contractAddress: string, provider: StandardProvider<Provider>): Promise<StarknetContractCode>;
     initialize(provider?: StandardProvider<Provider>): Promise<this>;
     callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: StandardProvider<Provider>): Promise<any>;
     organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
