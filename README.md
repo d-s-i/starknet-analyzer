@@ -2,8 +2,10 @@
 
 # Help analyze onchain data
 
+Install: `npm i starknet-analyzer`
+
 ## Transform this:
-```
+```ts
 [
   '0x4',
   '0x74555344432f7457455448',
@@ -47,7 +49,7 @@
 
 ## Into this:
 
-```
+```ts
 [
     {
         name: 'pools_ptr_len',
@@ -127,7 +129,7 @@ Should be run on Linux
 ### How to intiialize: 
 
 Letting the network initializing it: 
-```
+```ts
 import { defaultProvider } from "starknet";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/organizers/ContractCallOrganizer";
 
@@ -137,7 +139,7 @@ const contractCallOrganizer = await new ContractCallOrganizer(contractAddress).i
 ```
 
 Initializing it yourself with your abi:
-```
+```ts
 import { defaultProvider } from "starknet";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/analyzers/ContractCallOrganizer";
 
@@ -159,7 +161,7 @@ const contractCallOrganizer = new ContractCallOrganizer(
 
 #### Function outputs (example: view functions)
 
-```
+```ts
 import { defaultProvider } from "starknet";
 import { BigNumber } from "ethers";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/organizers/ContractCallOrganizer";
@@ -207,7 +209,7 @@ See `TransactionCallAnalyzer.ts::getCalldataPerCall` for an example.
 
 #### Events:
 
-```
+```ts
 import { defaultProvider } from "starknet";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/analyzers/ContractCallOrganizer";
 
@@ -245,7 +247,7 @@ console.log(events);
 
 ### How to use:
 
-```
+```ts
 import { TransactionCallOrganizer } from "starknet-analyzer/lib/organizers/TransactionCallOrganizer";
 import { defaultProvider } from "starknet";
 
@@ -275,7 +277,7 @@ const functionCalls = await transactionCallOrganizer.getCalldataPerCallFromTx(tx
 
 ### How to use:
 
-```
+```ts
 import { defaultProvider } from "starknet";
 import { BlockOrganizer } from "./organizers/BlockOrganizer";
 
@@ -304,7 +306,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 ### How to use:
 
-```
+```ts
     import { defaultProvider } from "starknet";
     import { BlockOrganizer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
     import { TransferAnalyzer } from "starknet-analyzer/lib/analyzers/TransferAnalyzer";
@@ -322,7 +324,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 ### How to use:
 
-```
+```ts
     import { defaultProvider } from "starknet";
     import { BlockOrganizer } from "starknet-analyzer/lib/organizers/BlockOrganizer";
     import { SwapAnalyzer } from "starknet-analyzer/lib/analyzers/SwapAnalyzer";
@@ -340,7 +342,7 @@ const transactions = await blockOrganizer.organizeTransactions(block);
 
 ### How to use:
 
-```
+```ts
     import { defaultProvider } from "starknet";
     import { EventAnalyzer } from "starknet-analyzer/lib/analyzers/EventAnalyzer";
 
