@@ -1,12 +1,11 @@
 import { BigNumber } from "ethers";
-import { InvokeFunctionTransaction, Provider } from "starknet";
+import { InvokeTransactionResponse, ProviderInterface } from "starknet";
 import { FunctionCall, CallArray, ContractCallOrganizerMap } from "../types/organizedStarknet";
-import { StandardProvider } from "../types";
 import { ReceiptOrganizer } from "./ReceiptOrganizer";
 export declare class TransactionCallOrganizer extends ReceiptOrganizer {
-    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap);
-    getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction): Promise<FunctionCall[]>;
-    getCalldataPerCall(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
+    constructor(provider: ProviderInterface, contractCallOrganizer?: ContractCallOrganizerMap);
+    organizeCalldataOfTx(transaction: InvokeTransactionResponse): Promise<FunctionCall[]>;
+    organizeFunctionCalls(callArray: CallArray[], fullTxCalldata: BigNumber[]): Promise<{
         name: any;
         to: BigNumber;
         calldata: any;
@@ -17,7 +16,7 @@ export declare class TransactionCallOrganizer extends ReceiptOrganizer {
      * 2) The arguments of each contract call
      * @returns an organized object of a transaction calldata
      */
-    static destructureFunctionCalldata(tx: InvokeFunctionTransaction): {
+    static destructureFunctionCalldata(tx: InvokeTransactionResponse): {
         callArray: {
             to: BigNumber;
             selector: BigNumber;
@@ -32,7 +31,7 @@ export declare class TransactionCallOrganizer extends ReceiptOrganizer {
      * @param tx: An invoke function transaction as you get when you query a tx from the starknetjs defaultProvider
      * @returns The Call array (being { to, selector, dataOffset, dataLen })
      */
-    static _getCallArrayFromTx(tx: InvokeFunctionTransaction): {
+    static _getCallArrayFromTx(tx: InvokeTransactionResponse): {
         to: BigNumber;
         selector: BigNumber;
         dataOffset: BigNumber;
@@ -44,7 +43,7 @@ export declare class TransactionCallOrganizer extends ReceiptOrganizer {
      * @param offset: A number telling where we should start reading the calldata (in case there are many calls and many calldata for example)
      * @returns The calldata of the given call
      */
-    static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number): BigNumber[];
+    static _getRawFunctionCalldataFromTx(tx: InvokeTransactionResponse, offset: number): BigNumber[];
     static getSpecificArgFromFunctionCall(argName: string, { calldata }: FunctionCall): any;
 }
 //# sourceMappingURL=TransactionCallOrganizer.d.ts.map

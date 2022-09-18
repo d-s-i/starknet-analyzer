@@ -1,20 +1,5 @@
 node_modules
-src/analyzers/BlockAnalyzer.d.ts
-src/analyzers/BlockAnalyzer.js
-src/analyzers/ContractCallAnalyzer.d.ts
-src/analyzers/ContractCallAnalyzer.js
-src/analyzers/TransactionCallAnalyzer.d.ts
-src/analyzers/TransactionCallAnalyzer.js
-src/analyzers/index.js
-src/analyzers/index.d.ts
-
-src/lib/constant.d.ts
-src/lib/constant.js
-src/lib/helpers.d.ts
-src/lib/helpers.js
-
-src/index.d.ts
-src/index.js
+.env
 
 tests
 scripts

@@ -1,11 +1,10 @@
-import { Provider } from "starknet";
+import { ProviderInterface } from "starknet";
 import { TransferAnalyzer } from "./TransferAnalyzer";
-import { StandardProvider } from "../types";
 import { OrganizedSwap, SwappersTree, OrganizedEvent, OrganizedTransaction } from "../types/organizedStarknet";
 export declare class SwapAnalyzer extends TransferAnalyzer {
     private _swappersPerBlock;
     private _ALPHA_ROAD_FACTORY;
-    constructor(provider: StandardProvider<Provider>);
+    constructor(provider: ProviderInterface);
     analyzeSwapsInBlock(transactions: OrganizedTransaction[]): Promise<SwappersTree>;
     analyzeSwap(event: OrganizedEvent): Promise<OrganizedSwap>;
     /**

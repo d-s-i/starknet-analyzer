@@ -1,16 +1,15 @@
-import { Provider } from "starknet";
+import { ProviderInterface } from "starknet";
 import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
-import { StandardProvider } from "../types";
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
 import { getFullSelector } from "./helpers";
 
 export class ContractCallOrganizerStorage {
 
-    private _provider: StandardProvider<Provider>;
+    private _provider: ProviderInterface;
     private _contractCallOrganizers: ContractCallOrganizerMap;
 
-    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
+    constructor(provider: ProviderInterface, contractCallOrganizer?: ContractCallOrganizerMap) {
         this._contractCallOrganizers = {};
         this._provider = provider;
         if(contractCallOrganizer) {

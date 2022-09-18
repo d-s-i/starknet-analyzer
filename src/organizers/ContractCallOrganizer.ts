@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { defaultProvider, Provider } from "starknet";
+import { defaultProvider, ProviderInterface, RpcProvider } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
 
 import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
@@ -13,8 +13,7 @@ import {
     OrganizedEvent,
     StarknetContractCode
 } from "../types/organizedStarknet";
-import { Abi, Event, GetCodeResponse } from "../types/rawStarknet";
-import { StandardProvider } from "../types";
+import { Abi, Event } from "../types/rawStarknet";
 
 export class ContractCallOrganizer {
 
@@ -22,14 +21,14 @@ export class ContractCallOrganizer {
     private _structs: OrganizedStructAbi | undefined;
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
-    private _provider: StandardProvider<Provider> | undefined;
+    private _provider: ProviderInterface | undefined;
 
     constructor(
         contractAddress: string,
         structs?: OrganizedStructAbi, 
         functions?: OrganizedFunctionAbi, 
         events?: OrganizedEventAbi,
-        provider?: StandardProvider<Provider>
+        provider?: ProviderInterface
     ) {
         this._address = contractAddress;
         this._structs = structs;
@@ -38,49 +37,71 @@ export class ContractCallOrganizer {
         this._provider = provider;
     }
 
-    // need to change this because `getCode` doesn't work for implementation from proxies
-    static async getFullContractAbi(contractAddress: string, provider: StandardProvider<Provider>) {
+    /*
+        For the first contract you query `starknet_getClassAt`, it will give you the abi
+        Then if in the abi there is an implementation, query `getClass`. The implementation should not be deployed so the 
+        implementation query should return a classHash which is used in getClass
+    */
+    static async getFullContractAbi(contractAddress: string, provider: ProviderInterface) {
 
-        let { functions, structs, events } = await this.organizeContractAbiFromAddress(contractAddress, provider);
+        let { functions, structs, events } = await this.organizeContractAbiFromContractAddress(contractAddress, provider);
 
-        const proxyEntryPoints = ["get_implementation", "getImplementation", "implementation"];
-        const getImplementationSelectors = proxyEntryPoints.map(entrypoint => getFullSelectorFromName(entrypoint));
+        const implementationEntryPoints = [
+            "get_implementation_hash", 
+            "get_implementation", 
+            "getImplementationHash", 
+            "implementation", 
+            "implementationHash", 
+            "implementation_hash"
+        ];
+        const getImplementationSelectors = implementationEntryPoints.map(entrypoint => getFullSelectorFromName(entrypoint));
         const getImplementationIndex = getImplementationSelectors.findIndex(getImplementationSelector => {
             return Object.keys(functions).includes(getImplementationSelector);
         });
         if(getImplementationIndex !== -1) {
-            const { result: [implementationAddress] } = await defaultProvider.callContract({
+            const { result: [implementationClassHash] } = await provider.callContract({
                 contractAddress,
-                entrypoint: proxyEntryPoints[getImplementationIndex]
+                entrypoint: implementationEntryPoints[getImplementationIndex]
             });
             try {
                 const { 
                     functions: implementationFunctions,
                     structs: implementationStructs,
                     events: implementationEvents
-                } = await this.organizeContractAbiFromAddress(implementationAddress, provider);
+                } = await this.organizeContractAbiFromClassHash(implementationClassHash, provider);
     
                 functions = { ...functions, ...implementationFunctions };
                 structs = { ...structs, ...implementationStructs };
                 events = { ...events, ...implementationEvents };
             } catch(error) { 
+                console.log(" -- ContractCallOrganizer::getFullContractAbi -- ");
                 console.log(error);
             }
         }
         
-        
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    static async organizeContractAbiFromAddress(contractAddress: string, provider: StandardProvider<Provider>) {
-        const { abi } = await provider.getCode(contractAddress) as GetCodeResponse;
+    static async organizeContractAbiFromContractAddress(contractAddress: string, provider: ProviderInterface) {
+        // putting defaultProvider by default bc pathfinder nodes doesn't return abis
+        const { abi } = await defaultProvider.getClassAt(contractAddress, "latest");
 
-        if(Object.keys(abi).length === 0) {
+        if(!abi) {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
         }
     
         return this.organizeContractAbiFromAbi(abi);
+    }
 
+    static async organizeContractAbiFromClassHash(classHash: string, provider: ProviderInterface) {
+        // replace provider.getClass(classHash) until it's implemented by starknetjs + pathfinder doesn't return abis
+        const { abi } = await fetch(`http://alpha4.starknet.io/feeder_gateway/get_class_by_hash?classHash=${classHash}`).then(res => res.json());
+
+        if(!abi) {
+            throw new Error(`ContractCallOrganizer::organizeContractAbiFromClassHash - Couldn't fetch abi for classHash ${classHash} (abi: ${abi})`);
+        }
+        
+        return this.organizeContractAbiFromAbi(abi);
     }
 
     static organizeContractAbiFromAbi(abi: Abi) {
@@ -110,7 +131,7 @@ export class ContractCallOrganizer {
         return { functions, structs, events } as StarknetContractCode;
     }
 
-    async initialize(provider?: StandardProvider<Provider>) {
+    async initialize(provider: ProviderInterface) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
@@ -123,7 +144,7 @@ export class ContractCallOrganizer {
         return this;
     }
 
-    async callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: StandardProvider<Provider>) {
+    async callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: ProviderInterface) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
@@ -136,15 +157,20 @@ export class ContractCallOrganizer {
     
         const rawResBN = rawRes.map((rawPool: any) => BigNumber.from(rawPool));
     
-        const { subcalldata } = this.organizeFunctionOutput(
+        // const { subcalldata } = this.organizeFunctionOutput(
+        //     getFullSelectorFromName(entrypoint),
+        //     rawResBN
+        // ) as any;
+
+        const { subcalldata } = this.organizeCalldata(
             getFullSelectorFromName(entrypoint),
             rawResBN
-        ) as any;
+        )
 
         return subcalldata;
     }
 
-    organizeFunctionInput(
+    organizeCalldata(
         functionSelector: string,
         fullCalldataValues: BigNumber[], 
         startIndex?: number
@@ -166,27 +192,49 @@ export class ContractCallOrganizer {
         return { subcalldata: calldata, endIndex: calldataIndex };
     }
 
-    organizeFunctionOutput(
-        functionSelector: string,
-       fullCalldataValues: BigNumber[], 
-       startIndex?: number
-    ) {
+    // organizeFunctionInput(
+    //     functionSelector: string,
+    //     fullCalldataValues: BigNumber[], 
+    //     startIndex?: number
+    // ) {
+
+    //     const inputs = this.getFunctionAbiFromSelector(functionSelector).inputs;
+    //     let calldataIndex = startIndex || 0;
+    
+    //     let calldata: OrganizedCalldata = [];
+    //     for(const input of inputs) {
+    //         const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+    //             input.type,
+    //             { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex }
+    //         );
+    //         calldataIndex = endIndex;
+    //         calldata.push({ ...input, value: argsValues });
+    //     }
+    
+    //     return { subcalldata: calldata, endIndex: calldataIndex };
+    // }
+
+    // organizeFunctionOutput(
+    //     functionSelector: string,
+    //    fullCalldataValues: BigNumber[], 
+    //    startIndex?: number
+    // ) {
         
-        const outputs = this.getFunctionAbiFromSelector(functionSelector).outputs;
-        let calldataIndex = startIndex || 0;
+    //     const outputs = this.getFunctionAbiFromSelector(functionSelector).outputs;
+    //     let calldataIndex = startIndex || 0;
 
-        let calldata: OrganizedCalldata = [];
-        for(const output of outputs) {
-            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
-                output.type,
-                { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex },
-            );
-            calldataIndex = endIndex;
-            calldata.push({ ...output, value: argsValues });
-        }
+    //     let calldata: OrganizedCalldata = [];
+    //     for(const output of outputs) {
+    //         const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+    //             output.type,
+    //             { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex },
+    //         );
+    //         calldataIndex = endIndex;
+    //         calldata.push({ ...output, value: argsValues });
+    //     }
 
-        return { subcalldata: calldata, endIndex: calldataIndex };
-    }
+    //     return { subcalldata: calldata, endIndex: calldataIndex };
+    // }
 
     organizeEvent(event: Event) {
         // TODO: make another for loop for each keys in case many events are triggered
@@ -323,6 +371,42 @@ export class ContractCallOrganizer {
 
     getFunctionAbiFromSelector(_functionSelector: string) {
         const functionSelector = getFullSelector(_functionSelector);
+        if(functionSelector === "0x00") return {
+            "inputs": [
+                {
+                    "name": "call_array_len",
+                    "type": "felt"
+                },
+                {
+                    "name": "call_array",
+                    "type": "CallArray*"
+                },
+                {
+                    "name": "calldata_len",
+                    "type": "felt"
+                },
+                {
+                    "name": "calldata",
+                    "type": "felt*"
+                },
+                {
+                    "name": "nonce",
+                    "type": "felt"
+                }
+            ],
+            "name": "__execute__",
+            "outputs": [
+                {
+                    "name": "retdata_size",
+                    "type": "felt"
+                },
+                {
+                    "name": "retdata",
+                    "type": "felt*"
+                }
+            ],
+            "type": "function"
+        };
         if(!this.functions) {
             throw new Error(
                 `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions declared for this ContractAnalyzer instance (functions: ${this.functions})`

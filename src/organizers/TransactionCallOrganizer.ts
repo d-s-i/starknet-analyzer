@@ -1,7 +1,8 @@
 import { BigNumber } from "ethers";
 import {
-    InvokeFunctionTransaction,
-    Provider
+    InvokeTransactionResponse,
+    ProviderInterface,
+    RpcProvider
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
@@ -10,24 +11,23 @@ import {
     CallArray,
     ContractCallOrganizerMap
 } from "../types/organizedStarknet";
-import { StandardProvider } from "../types";
 import  { ReceiptOrganizer } from "./ReceiptOrganizer";
 import { getFullSelector } from "../helpers/helpers";
 
 export class TransactionCallOrganizer extends ReceiptOrganizer {
 
-    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
+    constructor(provider: ProviderInterface, contractCallOrganizer?: ContractCallOrganizerMap) {
         super(provider, contractCallOrganizer);
     }
     
-    async getCalldataPerCallFromTx(transaction: InvokeFunctionTransaction) {
+    async organizeCalldataOfTx(transaction: InvokeTransactionResponse) {
             const { callArray, rawFnCalldata } = TransactionCallOrganizer.destructureFunctionCalldata(transaction);
-            const functionCalls = await this.getCalldataPerCall(callArray, rawFnCalldata);
+            const functionCalls = await this.organizeFunctionCalls(callArray, rawFnCalldata);
         
             return functionCalls as FunctionCall[];
     }
 
-    async getCalldataPerCall(
+    async organizeFunctionCalls(
         callArray: CallArray[],
         fullTxCalldata: BigNumber[]
     ) {
@@ -36,7 +36,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         for(const call of callArray) {
             const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(call.to));
     
-            const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
+            const { subcalldata, endIndex } = contractCallOrganizer.organizeCalldata(
                 call.selector.toHexString(), 
                 fullTxCalldata, 
                 rawCalldataIndex, 
@@ -60,7 +60,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * 2) The arguments of each contract call
      * @returns an organized object of a transaction calldata
      */
-    static destructureFunctionCalldata(tx: InvokeFunctionTransaction) {
+    static destructureFunctionCalldata(tx: InvokeTransactionResponse) {
         if(!tx.calldata) {
             console.log("TransactionAnalyzer::destructureFunctionCalldata - Calldata of tx is undefined, tx: ", tx);
             throw new Error(
@@ -83,7 +83,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * @param tx: An invoke function transaction as you get when you query a tx from the starknetjs defaultProvider
      * @returns The Call array (being { to, selector, dataOffset, dataLen })
      */
-    static _getCallArrayFromTx(tx: InvokeFunctionTransaction) {
+    static _getCallArrayFromTx(tx: InvokeTransactionResponse) {
         let callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
         let callArray = [];
         // offset i by 1 so that it start at the `call_array` first value, and not at `call_array_len`
@@ -106,7 +106,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * @param offset: A number telling where we should start reading the calldata (in case there are many calls and many calldata for example)
      * @returns The calldata of the given call
      */
-    static _getRawFunctionCalldataFromTx(tx: InvokeFunctionTransaction, offset: number) {
+    static _getRawFunctionCalldataFromTx(tx: InvokeTransactionResponse, offset: number) {
         const calldataLength = BigNumber.from(tx.calldata![offset]).toNumber();
         let fnCalldata = [];
         for(let j = offset + 1; j <= calldataLength + offset; j++) {

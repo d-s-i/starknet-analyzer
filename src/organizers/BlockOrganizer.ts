@@ -1,44 +1,52 @@
 import { 
-    Provider, 
-    InvokeFunctionTransaction
+    ProviderInterface, 
 } from "starknet";
 
-import { 
-    GetBlockResponse,
-    TransactionReceipt
-} from "../types/rawStarknet";
 import {
     OrganizedEvent,
     FunctionCall,
     OrganizedTransaction,
     ContractCallOrganizerMap
 } from "../types/organizedStarknet";
-import { StandardProvider } from "../types";
 import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
 import { sleep } from "../helpers/helpers";
+import { GetBlockResponse, InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class BlockOrganizer extends TransactionCallOrganizer {
 
     private _msBetweenCallQueries: number;
     
-    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries?: number, contractCallOrganizer?: ContractCallOrganizerMap) {
+    constructor(provider: ProviderInterface, msBetweenCallQueries?: number, contractCallOrganizer?: ContractCallOrganizerMap) {
         super(provider, contractCallOrganizer);
         this._msBetweenCallQueries = msBetweenCallQueries || 0;
     }
 
     async organizeTransactions(block: GetBlockResponse) {
-        const transactions = block.transactions;
-        const receipts = block.transaction_receipts as TransactionReceipt[];
+        const tsHashes = block.transactions;
+
+        let transactions = [];
+        let receipts = [];
+        for(const hash of tsHashes) {
+            const tx = await this.provider.getTransaction(hash);
+            const receipt = await this.provider.getTransactionReceipt(hash);
+            transactions.push(tx);
+            receipts.push(receipt);
+            await sleep(this._msBetweenCallQueries)
+        }
 
         let organizedTransactions: OrganizedTransaction[] = [];
-        for(const receipt of receipts) {
-            if(transactions[receipt.transaction_index].type !== "INVOKE_FUNCTION") continue;
-            const tx = transactions[receipt.transaction_index] as InvokeFunctionTransaction;
+        for(let i = 0; i < transactions.length; i++) {
+            const tx = transactions[i];
+            const receipt = receipts[i];
             
             let events: OrganizedEvent[] = [];
-            let functionCalls: FunctionCall[] | undefined = [];
+            let functionCalls: FunctionCall[] = [];
+
+            // === tx is not of type INVOKE_FUNCTION
+            if(!tx.calldata) continue;
+
             try {
-                events = await super.getEventsFromReceipt(receipt);
+                events = await super.getEventsFromReceipt(receipt as InvokeTransactionReceiptResponse);
             } catch(error) {
                 // console.log("----------- ERROR -----------");
                 // console.log(`EVENT ERROR on tx ${receipt.transaction_hash}`, error);
@@ -47,7 +55,7 @@ export class BlockOrganizer extends TransactionCallOrganizer {
                 // console.log(receipt.events);
             }
             try {
-                functionCalls = await super.getCalldataPerCallFromTx(tx);
+                functionCalls = await super.organizeCalldataOfTx(tx);
             } catch(error) {
                 // console.log("----------- ERROR -----------");
                 // console.log(`FUNCTION ERROR on tx ${receipt.transaction_hash}`, error);
@@ -61,12 +69,11 @@ export class BlockOrganizer extends TransactionCallOrganizer {
                 hash: receipt.transaction_hash,
                 events,
                 functionCalls,
-                origin: tx.contract_address,
-                entrypointSelector: tx.entry_point_selector,
+                origin: tx.contract_address || "",
+                entrypointSelector: tx.entry_point_selector || "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
                 type: "ORGANIZED_INVOKE_FUNCTION"
             });
         }
-
         return organizedTransactions;
     }
 }

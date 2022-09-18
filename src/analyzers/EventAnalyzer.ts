@@ -1,18 +1,17 @@
-import { Provider } from "starknet";
+import { Provider, ProviderInterface, RpcProvider } from "starknet";
 
 import { SwapAnalyzer } from "./SwapAnalyzer";
 import { BlockOrganizer } from "../organizers/BlockOrganizer";
 import { forceCast } from "../helpers/helpers";
 
-import { StandardProvider } from "../types";
 import { SwappersTree, TransfersTreePerAccount } from "../types/organizedStarknet";
-import { GetBlockResponse } from "../types/rawStarknet";
+import { GetBlockResponse } from "starknet/types";
 
 export class EventAnalyzer extends SwapAnalyzer {
 
     private _msBetweenCallQueries: number;
 
-    constructor(provider: StandardProvider<Provider>, msBetweenCallQueries: number) {
+    constructor(provider: RpcProvider, msBetweenCallQueries: number) {
         super(provider);
         this._msBetweenCallQueries = msBetweenCallQueries;
     }

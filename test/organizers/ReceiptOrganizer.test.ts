@@ -1,6 +1,6 @@
-import { testReceiptOrganizer, receiptOrganizer, TX_HASH, provider } from "./index.test";
+import { testReceiptOrganizer, receiptOrganizer, INVOKE_TX_HASH_V0, provider } from "../index.test";
 
-describe("ReceiptOrganizer", async function() {
+testReceiptOrganizer && describe("ReceiptOrganizer", async function() {
     it("Organize an event", async function() {
         /*
             tx {
@@ -41,7 +41,7 @@ describe("ReceiptOrganizer", async function() {
             ]
         }
         */
-        const receipt = await provider.getTransactionReceipt(TX_HASH);
+        const receipt = await provider.getTransactionReceipt(INVOKE_TX_HASH_V0);
         console.log("receipt", receipt);
         const organizedEvents = await receiptOrganizer.getEventsFromReceipt(receipt as any);
         console.log("organizedEvents", organizedEvents);

@@ -1,20 +1,18 @@
-import { Provider } from "starknet";
+import { Provider, ProviderInterface, RpcProvider } from "starknet";
 
 import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerStorage";
 
-import { StandardProvider } from "../types";
-import { TransactionReceipt } from "../types/rawStarknet";
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
 import { getFullSelector } from "../helpers/helpers";
+import { InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class ReceiptOrganizer extends ContractCallOrganizerStorage {
 
-    
-    constructor(provider: StandardProvider<Provider>, contractCallOrganizer?: ContractCallOrganizerMap) {
+    constructor(provider: ProviderInterface, contractCallOrganizer?: ContractCallOrganizerMap) {
         super(provider, contractCallOrganizer);
     }
     
-    async getEventsFromReceipt(receipt: TransactionReceipt) {
+    async getEventsFromReceipt(receipt: InvokeTransactionReceiptResponse) {
         let _organizedEvents = [];
         for(const _event of receipt.events) {
             try {

@@ -1,16 +1,14 @@
 import { BigNumber } from "ethers";
-import { Provider } from "starknet";
-
-import { StandardProvider } from "../types";
+import { ProviderInterface } from "starknet";
 
 export class QueryHelper {
 
-    private _provider: StandardProvider<Provider>;
+    private _provider: ProviderInterface;
     private _tokens: { [tokenAddress: string]: { symbol: string, decimals: number } };
     private _pairs: { [lpTokenAddress: string]: { token0: string | undefined, token1: string | undefined } };
     private _factoriesAddresses: { [lpTokenAddress: string]: string };
     
-    constructor(provider: StandardProvider<Provider>) {
+    constructor(provider: ProviderInterface) {
         this._provider = provider;
         this._tokens = {};
         this._pairs = {};
