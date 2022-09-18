@@ -162,7 +162,7 @@ export class ContractCallOrganizer {
         //     rawResBN
         // ) as any;
 
-        const { subcalldata } = this.organizeCalldata(
+        const { subcalldata } = this.organizeFunctionOutput(
             getFullSelectorFromName(entrypoint),
             rawResBN
         )
@@ -170,7 +170,7 @@ export class ContractCallOrganizer {
         return subcalldata;
     }
 
-    organizeCalldata(
+    organizeFunctionInput(
         functionSelector: string,
         fullCalldataValues: BigNumber[], 
         startIndex?: number
@@ -192,50 +192,28 @@ export class ContractCallOrganizer {
         return { subcalldata: calldata, endIndex: calldataIndex };
     }
 
-    // organizeFunctionInput(
-    //     functionSelector: string,
-    //     fullCalldataValues: BigNumber[], 
-    //     startIndex?: number
-    // ) {
-
-    //     const inputs = this.getFunctionAbiFromSelector(functionSelector).inputs;
-    //     let calldataIndex = startIndex || 0;
-    
-    //     let calldata: OrganizedCalldata = [];
-    //     for(const input of inputs) {
-    //         const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
-    //             input.type,
-    //             { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex }
-    //         );
-    //         calldataIndex = endIndex;
-    //         calldata.push({ ...input, value: argsValues });
-    //     }
-    
-    //     return { subcalldata: calldata, endIndex: calldataIndex };
-    // }
-
-    // organizeFunctionOutput(
-    //     functionSelector: string,
-    //    fullCalldataValues: BigNumber[], 
-    //    startIndex?: number
-    // ) {
+    organizeFunctionOutput(
+        functionSelector: string,
+       fullCalldataValues: BigNumber[], 
+       startIndex?: number
+    ) {
         
-    //     const outputs = this.getFunctionAbiFromSelector(functionSelector).outputs;
-    //     let calldataIndex = startIndex || 0;
+        const outputs = this.getFunctionAbiFromSelector(functionSelector).outputs;
+        let calldataIndex = startIndex || 0;
 
-    //     let calldata: OrganizedCalldata = [];
-    //     for(const output of outputs) {
-    //         const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
-    //             output.type,
-    //             { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex },
-    //         );
-    //         calldataIndex = endIndex;
-    //         calldata.push({ ...output, value: argsValues });
-    //     }
+        let calldata: OrganizedCalldata = [];
+        for(const output of outputs) {
+            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+                output.type,
+                { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex },
+            );
+            calldataIndex = endIndex;
+            calldata.push({ ...output, value: argsValues });
+        }
 
-    //     return { subcalldata: calldata, endIndex: calldataIndex };
-    // }
-
+        return { subcalldata: calldata, endIndex: calldataIndex };
+    }
+    
     organizeEvent(event: Event) {
         // TODO: make another for loop for each keys in case many events are triggered
         // (never saw this case yet after analysing hundreds of blocks)

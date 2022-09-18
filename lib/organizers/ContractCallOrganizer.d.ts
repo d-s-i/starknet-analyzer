@@ -16,7 +16,11 @@ export declare class ContractCallOrganizer {
     static organizeContractAbiFromAbi(abi: Abi): StarknetContractCode;
     initialize(provider: ProviderInterface): Promise<this>;
     callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: ProviderInterface): Promise<OrganizedCalldata>;
-    organizeCalldata(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
+    organizeFunctionInput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
+        subcalldata: OrganizedCalldata;
+        endIndex: number;
+    };
+    organizeFunctionOutput(functionSelector: string, fullCalldataValues: BigNumber[], startIndex?: number): {
         subcalldata: OrganizedCalldata;
         endIndex: number;
     };
