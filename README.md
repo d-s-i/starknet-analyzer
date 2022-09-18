@@ -126,6 +126,7 @@ Should be run on Linux
 
 ### How to intiialize: 
 
+Letting the network initializing it: 
 ```
 import { defaultProvider } from "starknet";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/organizers/ContractCallOrganizer";
@@ -135,14 +136,23 @@ const contractAddr = "0x0000...e54";
 const contractCallOrganizer = await new ContractCallOrganizer(contractAddress).initialize(defaultProvider);
 ```
 
+Initializing it yourself with your abi:
 ```
 import { defaultProvider } from "starknet";
 import { ContractCallOrganizer } from "starknet-analyzer/lib/analyzers/ContractCallOrganizer";
 
+import { MY_CONTRACT_ADDRESS } from "./addresses";
+import yourAbi from "./abis/myAbi.json";
+
 const contractAddr = "0x0000...e54";
 
-const { events, functions, structs } = await ContractCallOrganizer.getContractAbi(contractAddr, defaultProvider);
-const contractCallOrganizer = new ContractCallOrganizer(contractAddr, structs, functions, events);
+const contractCallOrganizer = new ContractCallOrganizer(
+    MY_CONTRACT_ADDRESS, 
+    ContractCallOrganizer.organizeContractAbiFromAbi(yourAbi).structs, 
+    ContractCallOrganizer.organizeContractAbiFromAbi(yourAbi).functions,
+    ContractCallOrganizer.organizeContractAbiFromAbi(yourAbi).events,
+    provider
+);
 ```
 
 ### How to use:
