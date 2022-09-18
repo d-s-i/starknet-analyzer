@@ -1,8 +1,7 @@
 import { BigNumber } from "ethers";
 import {
     InvokeTransactionResponse,
-    ProviderInterface,
-    RpcProvider
+    ProviderInterface
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
@@ -36,7 +35,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         for(const call of callArray) {
             const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(call.to));
     
-            const { subcalldata, endIndex } = contractCallOrganizer.organizeCalldata(
+            const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
                 call.selector.toHexString(), 
                 fullTxCalldata, 
                 rawCalldataIndex, 

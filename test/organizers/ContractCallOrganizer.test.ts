@@ -18,42 +18,38 @@ testContractCallOrganizer && describe("ContractCallOrganizer", function() {
         console.log("res", res);
     });
 
-    // it("`organizeCalldata` - Organize function input (= calldata) into readable calldata for a tx version 0", async function() {
+    it("`organizeCalldata` - Organize function input (= calldata) into readable calldata for a tx version 0", async function() {
 
-    //     const tx = await provider.getTransaction(INVOKE_TX_HASH_V0);
+        const tx = await provider.getTransaction(INVOKE_TX_HASH_V0);
         
-    //     const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
+        const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
 
-    //     const functionInput = await contractCallOrganizer.organizeCalldata(tx.entry_point_selector!, tx.calldata);
+        const functionInput = await contractCallOrganizer.organizeFunctionOutput(tx.entry_point_selector!, tx.calldata);
 
-    //     console.log("functionInput", functionInput);
+        console.log("functionInput", functionInput);
         
-    // });
+    });
 
-    // it("`organizeCalldata` - Organize function input into readable calldata for a tx version 1", async function() {
+    it("`organizeCalldata` - Organize function input into readable calldata for a tx version 1", async function() {
 
-    //     const tx = await provider.getTransaction(INVOKE_TX_HASH_V1);
-    //     console.log("tx", tx);
+        const tx = await provider.getTransaction(INVOKE_TX_HASH_V1);
+        console.log("tx", tx);
         
-    //     const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
+        const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
 
-    //     const functionInput = await contractCallOrganizer.organizeCalldata(tx.entry_point_selector!, tx.calldata);
+        const functionInput = await contractCallOrganizer.organizeFunctionOutput(tx.entry_point_selector!, tx.calldata);
 
-    //     console.log("functionInput", functionInput);
+        console.log("functionInput", functionInput);
         
-    // });
+    });
 
-    // // it("`organizeFunctionOutput` - Organize function output into readable calldata", function() {
-    // //     throw new Error(`Duplicate method from organizeCalldata, method removed for now`);
-    // // });
+    it("`organizeEvent` - Organize event into readable calldata", async function() {
+        const receipt = await provider.getTransactionReceipt(INVOKE_TX_HASH_V0) as InvokeTransactionReceiptResponse; // v0 and v1 receipts are the same
+        const contractCallOrganizer = await new ContractCallOrganizer(receipt.events[0].from_address).initialize(provider);
 
-    // it("`organizeEvent` - Organize event into readable calldata", async function() {
-    //     const receipt = await provider.getTransactionReceipt(INVOKE_TX_HASH_V0) as InvokeTransactionReceiptResponse; // v0 and v1 receipts are the same
-    //     const contractCallOrganizer = await new ContractCallOrganizer(receipt.events[0].from_address).initialize(provider);
+        const organizedEvents = await contractCallOrganizer.organizeEvent(receipt.events[0]);
 
-    //     const organizedEvents = await contractCallOrganizer.organizeEvent(receipt.events[0]);
-
-    //     console.log("organizedEvents", organizedEvents);
-    // });
+        console.log("organizedEvents", organizedEvents);
+    });
     
 });

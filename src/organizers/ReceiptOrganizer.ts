@@ -1,4 +1,4 @@
-import { Provider, ProviderInterface, RpcProvider } from "starknet";
+import { ProviderInterface } from "starknet";
 
 import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerStorage";
 

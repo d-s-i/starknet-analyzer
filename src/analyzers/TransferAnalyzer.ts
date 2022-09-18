@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { Provider, ProviderInterface } from "starknet";
+import { ProviderInterface } from "starknet";
 
 import { QueryHelper } from "./QueryHelper";
 

@@ -1,4 +1,4 @@
-import { Provider, ProviderInterface } from "starknet";
+import { ProviderInterface } from "starknet";
 import { decodeShortString } from "starknet/dist/utils/shortString";
 import { uint256ToBN } from "../helpers/helpers";
 import { TransferAnalyzer } from "./TransferAnalyzer";

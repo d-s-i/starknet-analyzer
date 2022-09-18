@@ -1,4 +1,4 @@
-import { Provider, ProviderInterface, RpcProvider } from "starknet";
+import { ProviderInterface } from "starknet";
 
 import { SwapAnalyzer } from "./SwapAnalyzer";
 import { BlockOrganizer } from "../organizers/BlockOrganizer";
@@ -11,7 +11,7 @@ export class EventAnalyzer extends SwapAnalyzer {
 
     private _msBetweenCallQueries: number;
 
-    constructor(provider: RpcProvider, msBetweenCallQueries: number) {
+    constructor(provider: ProviderInterface, msBetweenCallQueries: number) {
         super(provider);
         this._msBetweenCallQueries = msBetweenCallQueries;
     }
