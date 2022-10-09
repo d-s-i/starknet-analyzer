@@ -165,7 +165,7 @@ export class ContractCallOrganizer {
         const { subcalldata } = this.organizeFunctionOutput(
             getFullSelectorFromName(entrypoint),
             rawResBN
-        )
+        );
 
         return subcalldata;
     }
