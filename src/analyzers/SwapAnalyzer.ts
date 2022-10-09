@@ -1,6 +1,6 @@
 import { ProviderInterface } from "starknet";
 import { decodeShortString } from "starknet/dist/utils/shortString";
-import { uint256ToBN } from "../helpers/helpers";
+import { uint256ToBN } from "../helpers";
 import { TransferAnalyzer } from "./TransferAnalyzer";
 
 import { OrganizedSwap, SwappersTree, OrganizedEvent, OrganizedTransaction } from "../types/organizedStarknet";

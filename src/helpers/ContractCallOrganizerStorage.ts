@@ -2,7 +2,7 @@ import { ProviderInterface } from "starknet";
 import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
-import { getFullSelector } from "./helpers";
+import { getFullSelector } from ".";
 
 export class ContractCallOrganizerStorage {
 

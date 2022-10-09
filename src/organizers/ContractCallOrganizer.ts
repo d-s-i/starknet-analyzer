@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { defaultProvider, ProviderInterface } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
 
-import { getFullSelectorFromName, getFullSelector } from "../helpers/helpers";
+import { getFullSelectorFromName, getFullSelector } from "../helpers";
 
 import { 
     OrganizedEventAbi, 

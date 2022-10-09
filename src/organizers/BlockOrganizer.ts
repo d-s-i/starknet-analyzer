@@ -9,7 +9,7 @@ import {
     ContractCallOrganizerMap
 } from "../types/organizedStarknet";
 import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
-import { sleep } from "../helpers/helpers";
+import { sleep } from "../helpers";
 import { GetBlockResponse, InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class BlockOrganizer extends TransactionCallOrganizer {

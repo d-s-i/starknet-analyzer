@@ -11,7 +11,7 @@ import {
     ContractCallOrganizerMap
 } from "../types/organizedStarknet";
 import  { ReceiptOrganizer } from "./ReceiptOrganizer";
-import { getFullSelector } from "../helpers/helpers";
+import { getFullSelector } from "../helpers";
 
 export class TransactionCallOrganizer extends ReceiptOrganizer {
 

@@ -3,7 +3,7 @@ import { ProviderInterface } from "starknet";
 import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerStorage";
 
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
-import { getFullSelector } from "../helpers/helpers";
+import { getFullSelector } from "../helpers";
 import { InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class ReceiptOrganizer extends ContractCallOrganizerStorage {

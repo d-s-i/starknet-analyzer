@@ -2,7 +2,7 @@ import { ProviderInterface } from "starknet";
 
 import { SwapAnalyzer } from "./SwapAnalyzer";
 import { BlockOrganizer } from "../organizers/BlockOrganizer";
-import { forceCast } from "../helpers/helpers";
+import { forceCast } from "../helpers";
 
 import { SwappersTree, TransfersTreePerAccount } from "../types/organizedStarknet";
 import { GetBlockResponse } from "starknet/types";
