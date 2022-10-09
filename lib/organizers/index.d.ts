@@ -1,4 +1,4 @@
-export * as BlockAnalyzer from "./BlockOrganizer";
-export * as ContractCallAnalyzer from "./ContractCallOrganizer";
-export * as TransactionCallAnalyzer from "./TransactionCallOrganizer";
+export * from "./BlockOrganizer";
+export * from "./ContractCallOrganizer";
+export * from "./TransactionCallOrganizer";
 //# sourceMappingURL=index.d.ts.map
