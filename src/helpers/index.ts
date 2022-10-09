@@ -20,3 +20,6 @@ export const uint256ToBN = function(num: { low: string, high: string }) {
 export function forceCast<T>(input: any): T {
     return input as T;
 }
+
+export * from "./ContractCallOrganizerStorage";
+export * from "./constants";
