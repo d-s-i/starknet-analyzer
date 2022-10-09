@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import assert from "assert";
-import { defaultProvider, Provider, RpcProvider } from "starknet";
+import { defaultProvider, RpcProvider } from "starknet";
 
 import { BlockOrganizer } from "../src/organizers/BlockOrganizer";
 import { TransactionCallOrganizer } from "../src/organizers/TransactionCallOrganizer";
@@ -16,7 +16,7 @@ export const INVOKE_TX_HASH_V1 = "0x3796576e3b42c8dc9990dea4dee0e43e0df10e489508
 export const INVOKE_TX_HASH_V0 = "0x7b58eb1b53ab3d363ad44fabbf6036acd480039c85aaad3844a9bfcf40439ca";
 
 export const testBlockOrganizer = false;
-export const testContractCallOrganizer = true;
+export const testContractCallOrganizer = false;
 export const testReceiptOrganizer = false;
 export const testTransactionCallOrganizer = false;
 

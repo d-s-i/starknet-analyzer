@@ -1,10 +1,9 @@
-import { ProviderInterface } from "starknet";
+import { ProviderInterface, addAddressPadding } from "starknet";
+import { InvokeTransactionReceiptResponse } from "starknet/types";
 
 import { ContractCallOrganizerStorage } from "../helpers/ContractCallOrganizerStorage";
 
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
-import { getFullSelector } from "../helpers";
-import { InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class ReceiptOrganizer extends ContractCallOrganizerStorage {
 
@@ -16,7 +15,7 @@ export class ReceiptOrganizer extends ContractCallOrganizerStorage {
         let _organizedEvents = [];
         for(const _event of receipt.events) {
             try {
-                const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(_event.from_address));
+                const contractCallOrganizer = await super.getContractOrganizer(addAddressPadding(_event.from_address));
                 const eventCalldata = contractCallOrganizer.organizeEvent(_event);
                 if(eventCalldata) {
                     _organizedEvents.push(eventCalldata);

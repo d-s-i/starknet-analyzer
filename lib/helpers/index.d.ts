@@ -1,7 +1,6 @@
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
 export declare const sleep: (ms: number) => Promise<unknown>;
 export declare const getFullSelectorFromName: (entrypoint: string) => string;
-export declare const getFullSelector: (selector: BigNumberish) => string;
 export declare const uint256ToBN: (num: {
     low: string;
     high: string;

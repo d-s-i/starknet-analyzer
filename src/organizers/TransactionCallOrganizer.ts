@@ -1,7 +1,8 @@
 import { BigNumber } from "ethers";
 import {
     InvokeTransactionResponse,
-    ProviderInterface
+    ProviderInterface,
+    addAddressPadding
 } from "starknet";
 
 import { callArrayStructLength } from "../helpers/constants";
@@ -11,7 +12,6 @@ import {
     ContractCallOrganizerMap
 } from "../types/organizedStarknet";
 import  { ReceiptOrganizer } from "./ReceiptOrganizer";
-import { getFullSelector } from "../helpers";
 
 export class TransactionCallOrganizer extends ReceiptOrganizer {
 
@@ -33,7 +33,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallOrganizer = await super.getContractOrganizer(getFullSelector(call.to));
+            const contractCallOrganizer = await super.getContractOrganizer(addAddressPadding(call.to));
     
             const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
                 call.selector.toHexString(), 

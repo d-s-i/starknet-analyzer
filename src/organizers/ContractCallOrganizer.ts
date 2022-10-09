@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
-import { defaultProvider, ProviderInterface } from "starknet";
+import { defaultProvider, ProviderInterface, addAddressPadding } from "starknet";
 import { BigNumberish } from "starknet/utils/number";
 
-import { getFullSelectorFromName, getFullSelector } from "../helpers";
+import { getFullSelectorFromName } from "../helpers";
 
 import { 
     OrganizedEventAbi, 
@@ -222,7 +222,7 @@ export class ContractCallOrganizer {
             throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
         }
 
-        const eventAbi = this.getEventAbiFromKey(getFullSelector(event.keys[0]));
+        const eventAbi = this.getEventAbiFromKey(addAddressPadding(event.keys[0]));
         
         let dataIndex = 0;
         let eventArgs = [];
@@ -348,7 +348,7 @@ export class ContractCallOrganizer {
     }
 
     getFunctionAbiFromSelector(_functionSelector: string) {
-        const functionSelector = getFullSelector(_functionSelector);
+        const functionSelector = addAddressPadding(_functionSelector);
         if(functionSelector === "0x00") return {
             "inputs": [
                 {

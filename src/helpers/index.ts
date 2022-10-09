@@ -1,4 +1,5 @@
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
+import { addAddressPadding } from "starknet";
 import { getSelectorFromName } from "starknet/utils/hash";
 
 export const sleep = async function(ms: number) {
@@ -6,11 +7,7 @@ export const sleep = async function(ms: number) {
 }
 
 export const getFullSelectorFromName = function(entrypoint: string) {
-    return BigNumber.from(getSelectorFromName(entrypoint)).toHexString();
-}
-
-export const getFullSelector = function(selector: BigNumberish) {
-    return BigNumber.from(selector).toHexString();
+    return addAddressPadding(getSelectorFromName(entrypoint));
 }
 
 export const uint256ToBN = function(num: { low: string, high: string }) {

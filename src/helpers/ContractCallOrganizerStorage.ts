@@ -1,8 +1,7 @@
-import { ProviderInterface } from "starknet";
+import { ProviderInterface, addAddressPadding } from "starknet";
 import { ContractCallOrganizer } from "../organizers/ContractCallOrganizer";
 
 import { ContractCallOrganizerMap } from "../types/organizedStarknet";
-import { getFullSelector } from ".";
 
 export class ContractCallOrganizerStorage {
 
@@ -14,7 +13,7 @@ export class ContractCallOrganizerStorage {
         this._provider = provider;
         if(contractCallOrganizer) {
             for(const [key, obj] of Object.entries(contractCallOrganizer)) {
-                this._contractCallOrganizers[getFullSelector(key)] = obj;
+                this._contractCallOrganizers[addAddressPadding(key)] = obj;
             }
         } else {
             this._contractCallOrganizers = {};
@@ -22,7 +21,7 @@ export class ContractCallOrganizerStorage {
     }
 
     async getContractOrganizer(_address: string) {
-        const address = getFullSelector(_address);
+        const address = addAddressPadding(_address);
         // store contract to avoid fetching the same contract twice for the same function call
         if(!this.contractCallOrganizers[address]) {
             this._contractCallOrganizers[address] = await new ContractCallOrganizer(address).initialize(this.provider);
