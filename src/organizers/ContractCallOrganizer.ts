@@ -164,9 +164,7 @@ export class ContractCallOrganizer {
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
         }
-        console.log("getting FULL ABI");
         const { events, functions, structs, enums } = await ContractCallOrganizer.getFullContractAbi(this.address, _provider);
-        console.log("DOOONNNNNEEE");
         this._structs = structs;
         this._functions = functions;
         this._events = events;
