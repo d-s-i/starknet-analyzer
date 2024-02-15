@@ -1,6 +1,6 @@
 {
   "name": "starknet-analyzer",
-  "version": "1.0.63",
+  "version": "1.0.64",
   "description": "Analyze starknet onchain data",
   "main": "dist/index.js",
   "types": "dist",
