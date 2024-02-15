@@ -1,10 +1,9 @@
-import { BigNumber } from "ethers";
 export declare const sleep: (ms: number) => Promise<unknown>;
 export declare const getFullSelectorFromName: (entrypoint: string) => string;
 export declare const uint256ToBN: (num: {
     low: string;
     high: string;
-}) => BigNumber;
+}) => bigint;
 export declare const forceCast: <T>(input: any) => T;
 export declare const getArrayDepth: (value: any[]) => number;
 export * from "./ContractCallOrganizerStorage";
