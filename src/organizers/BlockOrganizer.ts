@@ -1,5 +1,7 @@
 import { 
-    ProviderInterface, 
+    ProviderInterface,
+    GetBlockResponse,
+    InvokeTransactionReceiptResponse
 } from "starknet";
 
 import {
@@ -10,7 +12,6 @@ import {
 } from "../types/organizedStarknet";
 import { TransactionCallOrganizer } from "./TransactionCallOrganizer";
 import { sleep } from "../helpers";
-import { GetBlockResponse, InvokeTransactionReceiptResponse } from "starknet/types";
 
 export class BlockOrganizer extends TransactionCallOrganizer {
 

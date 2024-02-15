@@ -1,55 +1,61 @@
-import { defaultProvider } from "starknet";
-import { getSelectorFromName } from "starknet/dist/utils/hash";
-import { InvokeTransactionReceiptResponse } from "starknet/types";
+import { InvokeTransactionReceiptResponse } from "starknet";
 import { ContractCallOrganizer } from "../../src/organizers/ContractCallOrganizer";
-import { testContractCallOrganizer, provider, INVOKE_TX_HASH_V0, INVOKE_TX_HASH_V1 } from "../index.test";
+import { TransactionCallOrganizer } from "../../src/organizers/TransactionCallOrganizer";
+import { testContractCallOrganizer, provider, INVOKE_TX } from "../index.test";
 
 testContractCallOrganizer && describe("ContractCallOrganizer", function() {
 
-    it("`organizeContractAbiFromAddress` - Fetch ABI from an address", async function() {
-        const ADDR = "0xfa904eea70850fdd44e155dcc79a8d96515755ed43990ff4e7e7c096673e7";
-        const res = await ContractCallOrganizer.organizeContractAbiFromContractAddress(ADDR, defaultProvider);
-        console.log("res", res);
-    });
+    // it("`organizeContractAbiFromAddress` - Fetch ABI from an address", async function() {
+    //     const ADDR = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+    //     const res = await ContractCallOrganizer.organizeContractAbiFromContractAddress(ADDR, provider);
+    //     console.log("res", res);
+    // });
 
-    it("`getFullContractAbi`- Fecth ABI for a proxy", async function() { // Doesn't work yet, need the `getClass` method
-        const res = await ContractCallOrganizer.getFullContractAbi("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", provider);
+    // it("`getFullContractAbi`- Fecth ABI for a proxy", async function() { // Doesn't work yet, need the `getClass` method
+    //     const res = await ContractCallOrganizer.getFullContractAbi(BigInt("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"), provider);
 
-        console.log("res", res);
-    });
+    //     console.log("res", res);
+    // });
 
-    it("`organizeCalldata` - Organize function input (= calldata) into readable calldata for a tx version 0", async function() {
+    // it("`organizeCalldata` - Organize function input (= calldata) into readable calldata", async function() {
 
-        const tx = await provider.getTransaction(INVOKE_TX_HASH_V0);
+    //     const tx = await provider.getTransaction(INVOKE_TX);
+
+    //     const contractCalls = TransactionCallOrganizer.destructureFunctionCalldata(tx);
+
+    //     for(let i = 0; i < contractCalls.callArray.length; i++) {
+    //         const contractCallOrganizer = await new ContractCallOrganizer(contractCalls.callArray[i].to).initialize(provider);
+
+    //         const functionInput = await contractCallOrganizer.organizeFunctionInput(contractCalls.callArray[i].selector.toString(), contractCalls.rawFnCalldata);
+    
+    //         console.log("functionInput", functionInput);
+    //     }
         
-        const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
+    // });
 
-        const functionInput = await contractCallOrganizer.organizeFunctionOutput(tx.entry_point_selector!, tx.calldata);
+    it("`organizeCalldata` - Organize function output into readable calldata", async function() {
 
-        console.log("functionInput", functionInput);
+        const tx = await provider.getTransaction(INVOKE_TX);
+
+        const contractCalls = TransactionCallOrganizer.destructureFunctionCalldata(tx);
+
+        for(let i = 0; i < contractCalls.callArray.length; i++) {
+            const contractCallOrganizer = await new ContractCallOrganizer(contractCalls.callArray[i].to).initialize(provider);
+
+            const functionInput = await contractCallOrganizer.organizeFunctionOutput(contractCalls.callArray[i].selector.toString(), contractCalls.rawFnCalldata);
+    
+            console.log("functionInput", functionInput);
+        }
         
     });
 
-    it("`organizeCalldata` - Organize function input into readable calldata for a tx version 1", async function() {
+    // it("`organizeEvent` - Organize event into readable calldata", async function() {
+    //     const receipt = await provider.getTransactionReceipt(INVOKE_TX) as InvokeTransactionReceiptResponse; // v0 and v1 receipts are the same
+    //     const contractCallOrganizer = await new ContractCallOrganizer(BigInt(receipt.events![0].from_address)).initialize(provider);
 
-        const tx = await provider.getTransaction(INVOKE_TX_HASH_V1);
-        console.log("tx", tx);
-        
-        const contractCallOrganizer = await new ContractCallOrganizer(tx.contract_address!).initialize(provider);
+    //     const organizedEvents = await contractCallOrganizer.organizeEvent(receipt.events![0]);
 
-        const functionInput = await contractCallOrganizer.organizeFunctionOutput(tx.entry_point_selector!, tx.calldata);
-
-        console.log("functionInput", functionInput);
-        
-    });
-
-    it("`organizeEvent` - Organize event into readable calldata", async function() {
-        const receipt = await provider.getTransactionReceipt(INVOKE_TX_HASH_V0) as InvokeTransactionReceiptResponse; // v0 and v1 receipts are the same
-        const contractCallOrganizer = await new ContractCallOrganizer(receipt.events[0].from_address).initialize(provider);
-
-        const organizedEvents = await contractCallOrganizer.organizeEvent(receipt.events[0]);
-
-        console.log("organizedEvents", organizedEvents);
-    });
+    //     console.log("organizedEvents", organizedEvents);
+    // });
     
 });

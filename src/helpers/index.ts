@@ -1,21 +1,26 @@
 import { BigNumber } from "ethers";
-import { addAddressPadding } from "starknet";
-import { getSelectorFromName } from "starknet/utils/hash";
+import { addAddressPadding, hash } from "starknet";
 
 export const sleep = async function(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const getFullSelectorFromName = function(entrypoint: string) {
-    return addAddressPadding(getSelectorFromName(entrypoint));
+    return addAddressPadding(hash.getSelectorFromName(entrypoint));
 }
 
 export const uint256ToBN = function(num: { low: string, high: string }) {
     return BigNumber.from(num.low).add(num.high);
 }
 
-export function forceCast<T>(input: any): T {
+export const forceCast = function<T>(input: any): T {
     return input as T;
+}
+
+export const getArrayDepth = function(value: any[]): number {
+    return Array.isArray(value) ? 
+      1 + Math.max(0, ...value.map(getArrayDepth)) :
+      0;
 }
 
 export * from "./ContractCallOrganizerStorage";

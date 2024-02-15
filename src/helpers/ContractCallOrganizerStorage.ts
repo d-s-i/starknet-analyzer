@@ -24,7 +24,7 @@ export class ContractCallOrganizerStorage {
         const address = addAddressPadding(_address);
         // store contract to avoid fetching the same contract twice for the same function call
         if(!this.contractCallOrganizers[address]) {
-            this._contractCallOrganizers[address] = await new ContractCallOrganizer(address).initialize(this.provider);
+            this._contractCallOrganizers[address] = await new ContractCallOrganizer(BigInt(address)).initialize(this.provider);
             return this.contractCallOrganizers[address];
         } else {
             return this.contractCallOrganizers[address];

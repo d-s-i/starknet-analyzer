@@ -1,5 +1,4 @@
-import { BigNumber } from "ethers";
-import { AbiEntry } from "starknet/types/index";
+import { AbiEntry } from "starknet";
 import { EventAbi, FunctionAbi } from "./rawStarknet";
 
 export interface ContractInfos {
@@ -10,16 +9,17 @@ export interface ContractInfos {
 }
 
 export interface AccountCallArray {
-    to: BigNumber,
-    selector: BigNumber,
-    dataOffset: BigNumber,
-    dataLen: BigNumber
+    to: bigint,
+    selector: bigint,
+    dataOffset: bigint,
+    dataLen: bigint
 }
 
 export interface StarknetContractCode {
     functions: OrganizedFunctionAbi,
     structs: OrganizedStructAbi,
     events: OrganizedEventAbi,
+    enums: OrganizedEnumAbi
 }
 
 export interface OrganizedFunctionAbi { 
@@ -30,27 +30,38 @@ export interface OrganizedStructAbi {
     [key: string]: StarknetStruct
 }
 
+export interface OrganizedEnumAbi {
+    [key: string]: StarknetEnum
+}
+
 export interface OrganizedEventAbi { 
     [key: string]: EventAbi
 }
 
 export interface StarknetStruct { 
-    size: number,
-    properties: (AbiEntry & { offset: number; })[] | []
+    type: 'struct',
+    name: string,
+    members: { name: string, type: string }[]
+}
+
+export interface StarknetEnum {
+    type: 'enum',
+    name: string,
+    variants: { name: string, type: string }[]
 }
 
 export type StarknetArgument = { [key: string]: any };
 
 export interface CallArray {
-    to: BigNumber,
-    selector: BigNumber,
-    dataOffset: BigNumber,
-    dataLen: BigNumber
+    to: bigint,
+    selector: bigint,
+    dataOffset: bigint,
+    dataLen: bigint
 }
 
 export interface FunctionCall {
     name: string;
-    to: BigNumber;
+    to: bigint;
     calldata: OrganizedArgument[];
 }
 
@@ -79,20 +90,20 @@ export interface OrganizedTransaction {
     type: "ORGANIZED_INVOKE_FUNCTION"
 }
 
-export interface OrganizedTransfer { from: string, to: string, value: BigNumber, hash: string, symbol: string, decimals: number }
+export interface OrganizedTransfer { from: string, to: string, value: bigint, hash: string, symbol: string, decimals: number }
 export type TransfersTree = { received: OrganizedTransfer[] | undefined, sent: OrganizedTransfer[] | undefined };
 export interface TransfersTreePerAccount { [address: string]: TransfersTree }
 
 export interface OrganizedSwap {
     swapperAddress: string;
     tokenIn: {
-        amount: BigNumber;
+        amount: bigint;
         address: string;
         symbol: string;
         decimals: number;
     };
     tokenOut: {
-        amount: BigNumber;
+        amount: bigint;
         address: string;
         symbol: string;
         decimals: number;

@@ -28,24 +28,24 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
 
     async organizeFunctionCalls(
         callArray: CallArray[],
-        fullTxCalldata: BigNumber[]
+        fullTxCalldata: BigInt[]
     ) {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallOrganizer = await super.getContractOrganizer(addAddressPadding(call.to));
+            const contractCallOrganizer: ContractCallOrganizerMap = await super.getContractOrganizer(addAddressPadding(call.to.toString()));
     
             const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
-                call.selector.toHexString(), 
+                call.selector.toString(16), 
                 fullTxCalldata, 
                 rawCalldataIndex, 
             );
             if(!endIndex && endIndex !== 0) {
-                throw new Error(`BlockAnalyzer::getCalldataPerCall - No endIndex returned (endIndex: ${endIndex})`);
+                throw new Error(`TransactionCallOrganizer::organizeFunctionCalls - No endIndex returned (endIndex: ${endIndex})`);
             }
             rawCalldataIndex = endIndex;
             functionCalls.push({
-                name: contractCallOrganizer.getFunctionAbiFromSelector(call.selector.toHexString()).name,
+                name: contractCallOrganizer.getFunctionAbiFromSelector(call.selector.toString(16)).name,
                 to: call.to,
                 calldata: subcalldata
             });
@@ -70,9 +70,9 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         const callArray = this._getCallArrayFromTx(tx);
 
         const offset = (callArray.length * callArrayStructLength) + 1;
-        const rawFnCalldata = this._getRawFunctionCalldataFromTx(tx, offset);
+        const rawFnCalldata: bigint[] = this._getRawFunctionCalldataFromTx(tx, offset);
 
-        const nonce = tx.calldata[tx.calldata.length - 1];
+        const nonce: bigint = BigInt(tx.calldata[tx.calldata.length - 1]);
 
         return { callArray, rawFnCalldata, nonce };
     }
@@ -82,17 +82,17 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * @param tx: An invoke function transaction as you get when you query a tx from the starknetjs defaultProvider
      * @returns The Call array (being { to, selector, dataOffset, dataLen })
      */
-    static _getCallArrayFromTx(tx: InvokeTransactionResponse) {
-        let callArrayLength = BigNumber.from(tx.calldata![0]).toNumber();
+    static _getCallArrayFromTx(tx: InvokeTransactionResponse): CallArray[] {
+        let callArrayLength = +BigInt(tx.calldata![0]).toString();
         let callArray = [];
         // offset i by 1 so that it start at the `call_array` first value, and not at `call_array_len`
         // see the `__execute__` function's args at https://github.com/OpenZeppelin/cairo-contracts/blob/main/src/openzeppelin/account/Account.cairo
         for(let i = 1; i < callArrayLength * callArrayStructLength; i = i + callArrayStructLength) {
             callArray.push({
-                to: BigNumber.from(tx.calldata![i]),
-                selector: BigNumber.from(tx.calldata![i + 1]),
-                dataOffset: BigNumber.from(tx.calldata![i + 2]),
-                dataLen: BigNumber.from(tx.calldata![i + 3]),
+                to: BigInt(tx.calldata![i]),
+                selector: BigInt(tx.calldata![i + 1]),
+                dataOffset: BigInt(tx.calldata![i + 2]),
+                dataLen: BigInt(tx.calldata![i + 3]),
             });
         }
 
@@ -106,10 +106,10 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
      * @returns The calldata of the given call
      */
     static _getRawFunctionCalldataFromTx(tx: InvokeTransactionResponse, offset: number) {
-        const calldataLength = BigNumber.from(tx.calldata![offset]).toNumber();
+        const calldataLength = +BigInt(tx.calldata![offset]).toString();
         let fnCalldata = [];
         for(let j = offset + 1; j <= calldataLength + offset; j++) {
-            fnCalldata.push(BigNumber.from(tx.calldata![j]));
+            fnCalldata.push(BigInt(tx.calldata![j]));
         }
 
         return fnCalldata;

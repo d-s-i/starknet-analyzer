@@ -3,7 +3,7 @@ import { testBlockOrganizer, provider, blockOrganizer } from "../index.test";
 testBlockOrganizer && describe("BlockOrganizer", async function() {
 
     it("Organize transactions in block", async function() {
-        const blockNUmber = 338059;
+        const blockNUmber = 949277;
         const block = await provider.getBlock(blockNUmber);
         console.log("block", block);
 

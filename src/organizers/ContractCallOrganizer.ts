@@ -1,8 +1,6 @@
-import { BigNumber } from "ethers";
 import { defaultProvider, ProviderInterface, addAddressPadding } from "starknet";
-import { BigNumberish } from "starknet/utils/number";
 
-import { getFullSelectorFromName } from "../helpers";
+import { getArrayDepth, getFullSelectorFromName } from "../helpers";
 
 import { 
     OrganizedEventAbi, 
@@ -11,20 +9,23 @@ import {
     StarknetArgument,
     OrganizedCalldata,
     OrganizedEvent,
-    StarknetContractCode
+    StarknetContractCode,
+    OrganizedEnumAbi,
+    StarknetStruct
 } from "../types/organizedStarknet";
 import { Abi, Event } from "../types/rawStarknet";
 
 export class ContractCallOrganizer {
 
-    private _address: string;
+    private _address: bigint;
     private _structs: OrganizedStructAbi | undefined;
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
+    private _enums: OrganizedEnumAbi | undefined;
     private _provider: ProviderInterface | undefined;
 
     constructor(
-        contractAddress: string,
+        contractAddress: bigint,
         structs?: OrganizedStructAbi, 
         functions?: OrganizedFunctionAbi, 
         events?: OrganizedEventAbi,
@@ -42,9 +43,9 @@ export class ContractCallOrganizer {
         Then if in the abi there is an implementation, query `getClass`. The implementation should not be deployed so the 
         implementation query should return a classHash which is used in getClass
     */
-    static async getFullContractAbi(contractAddress: string, provider: ProviderInterface) {
+    static async getFullContractAbi(contractAddress: bigint, provider: ProviderInterface) {
 
-        let { functions, structs, events } = await this.organizeContractAbiFromContractAddress(contractAddress, provider);
+        let { functions, structs, events, enums } = await this.organizeContractAbiFromContractAddress(contractAddress.toString(16), provider);
 
         const implementationEntryPoints = [
             "get_implementation_hash", 
@@ -60,37 +61,40 @@ export class ContractCallOrganizer {
         });
         if(getImplementationIndex !== -1) {
             const { result: [implementationClassHash] } = await provider.callContract({
-                contractAddress,
+                contractAddress: contractAddress.toString(16),
                 entrypoint: implementationEntryPoints[getImplementationIndex]
             });
             try {
                 const { 
                     functions: implementationFunctions,
                     structs: implementationStructs,
-                    events: implementationEvents
+                    events: implementationEvents,
+                    enums: implementationEnums
                 } = await this.organizeContractAbiFromClassHash(implementationClassHash, provider);
     
                 functions = { ...functions, ...implementationFunctions };
                 structs = { ...structs, ...implementationStructs };
                 events = { ...events, ...implementationEvents };
+                enums = { ...enums, ...implementationEnums };
+
             } catch(error) { 
                 console.log(" -- ContractCallOrganizer::getFullContractAbi -- ");
                 console.log(error);
             }
         }
         
-        return { functions, structs, events } as StarknetContractCode;
+        return { functions, structs, events, enums } as StarknetContractCode;
     }
 
     static async organizeContractAbiFromContractAddress(contractAddress: string, provider: ProviderInterface) {
         // putting defaultProvider by default bc pathfinder nodes doesn't return abis
-        const { abi } = await defaultProvider.getClassAt(contractAddress, "latest");
+        const { abi } = await provider.getClassAt(contractAddress);
 
         if(!abi) {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
         }
     
-        return this.organizeContractAbiFromAbi(abi);
+        return this.organizeContractAbiFromAbi(JSON.parse(abi as any)); // starknetjs type is incorrect and forward a string instead of an array
     }
 
     static async organizeContractAbiFromClassHash(classHash: string, provider: ProviderInterface) {
@@ -106,29 +110,53 @@ export class ContractCallOrganizer {
 
     static organizeContractAbiFromAbi(abi: Abi) {
         let functions: OrganizedFunctionAbi = {};
+        let enums: OrganizedEnumAbi = {};
         let events: OrganizedEventAbi = {};
         let structs: OrganizedStructAbi = {};
+        let _interface;
         for(const item of abi) {
+            if(item.type === "impl") continue;
+
             if(
                 item.type === "function" || 
                 item.type === "l1_handler" ||
                 item.type === "constructor"
             ) {
-                const _name = getFullSelectorFromName(item.name);
+                const itemName = this._extractNameFromPath(item.name)
+                const _name = getFullSelectorFromName(itemName);
                 functions[_name] = item;
-            } 
-            if(item.type === "struct") {
+            } else if(item.type === "struct") {
                 structs[item.name] = {
-                    size: item.size,
-                    properties: item.members || []
+                    type: item.type,
+                    name: item.name,
+                    members: item.members || []
                 };
-            }
-            if(item.type === "event") {
-                const _name = getFullSelectorFromName(item.name);
+            } else if(item.type === "enum") {
+                enums[item.name] = item;
+            } else if(item.type === "event") {
+                const itemName = this._extractNameFromPath(item.name);
+                const _name = getFullSelectorFromName(itemName);
                 events[_name] = item;
+            } else if(item.type === "interface") {
+                _interface = item;
+            } else {
+                console.log("item", item);
+                throw new Error(`ContractCallOrganizer::organizeContractAbiFromAbi - Unhandled item type ${item.type}`);
             }
         }
-        return { functions, structs, events } as StarknetContractCode;
+
+        if(_interface) {
+            for(const item of _interface.items) {
+                if(item.type === "function") {
+                    const itemName = this._extractNameFromPath(item.name)
+                    const _name = getFullSelectorFromName(itemName);
+                    functions[_name] = item;
+                } else {
+                    throw new Error(`ContractCallOrganizer::organizeContractAbiFromAbi - Unhandled item type in interface ${item.type}`);
+                }
+            }
+        }
+        return { functions, structs, enums, events } as StarknetContractCode;
     }
 
     async initialize(provider: ProviderInterface) {
@@ -136,31 +164,27 @@ export class ContractCallOrganizer {
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
         }
-        const { events, functions, structs } = await ContractCallOrganizer.getFullContractAbi(this.address, _provider);
+        const { events, functions, structs, enums } = await ContractCallOrganizer.getFullContractAbi(this.address, _provider);
         this._structs = structs;
         this._functions = functions;
         this._events = events;
+        this._enums = enums;
         this._provider = _provider;
         return this;
     }
 
-    async callViewFn(entrypoint: string, calldata?: BigNumberish[], provider?: ProviderInterface) {
+    async callViewFn(entrypoint: string, calldata?: string[], provider?: ProviderInterface) {
         const _provider = provider ? provider : this.provider;
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
         }
         const { result: rawRes } = await _provider.callContract({
-            contractAddress: this.address,
+            contractAddress: this.address.toString(16),
             entrypoint,
             calldata: calldata || []
         });
     
-        const rawResBN = rawRes.map((rawPool: any) => BigNumber.from(rawPool));
-    
-        // const { subcalldata } = this.organizeFunctionOutput(
-        //     getFullSelectorFromName(entrypoint),
-        //     rawResBN
-        // ) as any;
+        const rawResBN = rawRes.map((rawPool: any) => BigInt(rawPool));
 
         const { subcalldata } = this.organizeFunctionOutput(
             getFullSelectorFromName(entrypoint),
@@ -172,38 +196,36 @@ export class ContractCallOrganizer {
 
     organizeFunctionInput(
         functionSelector: string,
-        fullCalldataValues: BigNumber[], 
+        fullCalldataValues: bigint[], 
         startIndex?: number
     ) {
-
         const inputs = this.getFunctionAbiFromSelector(functionSelector).inputs;
         let calldataIndex = startIndex || 0;
     
         let calldata: OrganizedCalldata = [];
         for(const input of inputs) {
-            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+            const { argsValues, endIndex } = this._decodeData(
                 input.type,
                 { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex }
             );
             calldataIndex = endIndex;
             calldata.push({ ...input, value: argsValues });
         }
-    
+
         return { subcalldata: calldata, endIndex: calldataIndex };
     }
 
     organizeFunctionOutput(
         functionSelector: string,
-       fullCalldataValues: BigNumber[], 
-       startIndex?: number
+        fullCalldataValues: bigint[], 
+        startIndex?: number
     ) {
-        
         const outputs = this.getFunctionAbiFromSelector(functionSelector).outputs;
         let calldataIndex = startIndex || 0;
 
         let calldata: OrganizedCalldata = [];
         for(const output of outputs) {
-            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+            const { argsValues, endIndex } = this._decodeData(
                 output.type,
                 { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex },
             );
@@ -211,140 +233,122 @@ export class ContractCallOrganizer {
             calldata.push({ ...output, value: argsValues });
         }
 
+        if(calldataIndex !== fullCalldataValues.length) {
+            throw new Error(`ContractCallOrganizer::organizeFunctionOutput - Data should have reached end of event calldata (make sure you didn't forgot to handle a given type)`);
+        }
         return { subcalldata: calldata, endIndex: calldataIndex };
     }
     
     organizeEvent(event: Event) {
-        // TODO: make another for loop for each keys in case many events are triggered
-        // (never saw this case yet after analysing hundreds of blocks)
-        // RE: Found one at txHash 0x2a709a4b385ee4ff07303636c3fe71964853cdaed824421475d639ab9b4eb9d (on goerli) but it's unclear how to interpret it
-        if(event.keys.length > 1) {
-            throw new Error(`ContractAnalyzer::structureEvent - You forwarded an event with many keys. This is a reminder this need to be added.`);
+        const eventSelector = event.keys[0];
+        const eventAbi = this.getEventAbiFromKey(addAddressPadding(eventSelector));
+        let dataIndex = 0;
+        let eventArgs: any[] = [];
+        let eventInKeys = [];
+        for(const member of eventAbi.members) {
+            if(member.kind === "key") {
+                eventInKeys.push(member);
+                continue;
+            }
+
+            if(member.kind === "data") {
+                const { argsValues, endIndex } = this._decodeData(
+                    member.type,
+                    { fullCalldataValues: event.data, startIndex: dataIndex }
+                );
+
+                dataIndex = endIndex;
+                eventArgs.push({ ...member, value: argsValues });
+    
+            } else {
+                console.log("event", event);
+                throw new Error(`ContractCallOrganizer::organizeEvent - Unhandled member kind ${member.kind} for event`);
+            }
         }
 
-        const eventAbi = this.getEventAbiFromKey(addAddressPadding(event.keys[0]));
-        
-        let dataIndex = 0;
-        let eventArgs = [];
-        for(const arg of eventAbi.data) {
-            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
-                arg.type, 
-                { fullCalldataValues: event.data, startIndex: dataIndex }, 
-            );
-            dataIndex = endIndex;
-            eventArgs.push({ ...arg, value: argsValues });
+        if(dataIndex !== event.data.length) {
+            console.log("dataIndex", dataIndex);
+            console.log("event.data.length", event.data.length);
+            throw new Error(`ContractCallOrganizer::organizeEvent - Data should have reached end of event calldata (make sure you didn't forgot to handle a given type)`);
         }
+
+        for(let i = 0; i < eventInKeys.length; i++) {
+            const arg = eventInKeys[i];
+            const value = event.keys[i + 1];
+            eventArgs.push({ ...arg, value });
+        }
+
         return { name: eventAbi.name, transmitterContract: event.from_address, calldata: eventArgs } as OrganizedEvent;
     }
 
-    _getArgumentsValuesFromCalldata(
+    _decodeData(
         type: string,
-        calldata: { fullCalldataValues: BigNumber[], startIndex: number },
+        calldata: { fullCalldataValues: bigint[], startIndex: number }
     ) {
-        const rawType = type.includes("*") ? type.slice(0, type.length - 1) : type;
-        if(type === "felt") {
-            const { felt, endIndex } = this._getFeltFromCalldata(calldata.fullCalldataValues, calldata.startIndex);
-            return { argsValues: felt, endIndex };
-        } else if(type === "felt*") {
-            const size = this._getArraySizeFromCalldata(calldata);
-            const { feltArray, endIndex } = this._getFeltArrayFromCalldata(calldata.fullCalldataValues, calldata.startIndex, size);
-            return { argsValues: feltArray, endIndex };
-        } else if(!type.includes("*") && type !== "felt") {
-            const { structCalldata, endIndex } = this._getStructFromCalldata(rawType, calldata.fullCalldataValues, calldata.startIndex);
-            return { argsValues: structCalldata, endIndex };
+        const _struct = this.structs && this.structs[type];
+        const _enum = this.enums && this.enums[type];
+        if(_struct) {
+            const { structCalldata: argsValues, endIndex } = this._getStructFromCalldata(_struct, calldata.fullCalldataValues, calldata.startIndex);
+            return { argsValues, endIndex };
+        } else if(_enum) {
+            // const enumPath = _enum.name.split("::");
+            // const enumName = enumPath[enumPath.length - 1];
+            // const value = { [enumName]:  };
+            return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
         } else {
-            const size = this._getArraySizeFromCalldata(calldata);
-            const { structArray, endIndex } = this._getStructArrayFromCalldata(
-                rawType, 
-                calldata.fullCalldataValues,
-                calldata.startIndex,
-                size
-            );
-            return { argsValues: structArray, endIndex };
+            const pathArr = type.split("::");
+            const isArray = (pathArr[0] === "core" || pathArr[0] === "@core") && pathArr[1] === "array";
+            if(isArray) {
+                const typeStart = type.indexOf("<") + 1;
+                const typeEnd = type.lastIndexOf(">");
+                const arrayType = type.slice(typeStart, typeEnd);
+                const { arrValues, endIndex } = this._getArrayFromCalldata(arrayType, calldata.fullCalldataValues, calldata.startIndex);
+
+                return { argsValues: arrValues, endIndex: endIndex };
+            }
+
+            return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
         }
     }
 
-    _getArraySizeFromCalldata(calldata: { fullCalldataValues: BigNumber[], startIndex: number }) {
-        try {
-            const size = BigNumber.from(calldata.fullCalldataValues[calldata.startIndex - 1].toString()).toNumber();
-            return size;
-        } catch(error) {
-            console.log("ContractAnalysze::getArraySizeFromCalldata - error", error);
-            throw new Error(
-                `ContractAnalysze::getArraySizeFromCalldata - Error trying to get the previous calldata index and converting it into number (value: ${calldata.fullCalldataValues[calldata.startIndex - 1]})`
-            );
-        }
-    }
-    
-    _getFeltFromCalldata(
-        calldata: BigNumber[],
-        startIndex: number
-    ) {
-        const felt = calldata[startIndex];
-        return { felt, endIndex: startIndex + 1 };
-    }
-    
-    _getFeltArrayFromCalldata(
-        calldata: BigNumber[],
-        startIndex: number,
-        sizeOfArray: number
-    ) {
-        let feltArray = [];
-        let calldataIndex = startIndex;
-        for(let j = startIndex; j < startIndex + sizeOfArray; j++) {
-            feltArray.push(calldata[j]);
-            calldataIndex++;
-        }
-    
-        return { feltArray, endIndex: calldataIndex };
-    }
-    
     _getStructFromCalldata(
-        type: string,
-        calldata: BigNumber[],
+        structAbi: StarknetStruct,
+        fullCalldataValues: bigint[],
         startIndex: number
     ) {
-        const structAbi = this.getStructAbiFromStructType(type);
         let structCalldata: StarknetArgument = {};
         let calldataIndex = startIndex;
-        for(const property of structAbi.properties) {
-            const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
+        for(const property of structAbi.members) {
+            const { argsValues, endIndex } = this._decodeData(
                 property.type,
-                { fullCalldataValues: calldata, startIndex: calldataIndex },
-
+                { fullCalldataValues: fullCalldataValues, startIndex: calldataIndex }
             );
+
             structCalldata[property.name] = argsValues;
             calldataIndex = endIndex;
         }
     
         return { structCalldata, endIndex: calldataIndex };
     }
-    
-    _getStructArrayFromCalldata(
-        type: string,
-        calldata: BigNumber[],
-        startIndex: number,
-        size: number
-    ) {
-        const structAbi = this.getStructAbiFromStructType(type);
-        let structArray = [];
-        let calldataIndex = startIndex;
-        for(let j = 0; j < size; j++) {
-            let singleStruct: StarknetArgument = {};
- 
-            for(const property of structAbi.properties!) {
-                const { argsValues, endIndex } = this._getArgumentsValuesFromCalldata(
-                    property.type,
-                    { fullCalldataValues: calldata, startIndex: calldataIndex },
 
-                );
-                singleStruct[property.name] = argsValues;
-                calldataIndex = endIndex;
-            }
-            structArray.push(singleStruct);
+    _getArrayFromCalldata(
+        type: string,
+        fullCalldataValues: bigint[],
+        startIndex: number
+    ) {
+        let calldataFinalEndIndex = startIndex;
+
+        const arrLength = +fullCalldataValues[startIndex].toString();
+        const start = startIndex + 1;
+        const end = start + arrLength;
+        let arrValues: any[] = [];
+        for(let i = start; i < end; i++) {
+            const { argsValues, endIndex } = this._decodeData(type, { fullCalldataValues, startIndex: calldataFinalEndIndex })
+            arrValues.push(argsValues);
+            calldataFinalEndIndex = endIndex;
         }
-    
-        return { structArray, endIndex: calldataIndex };
+        
+        return { arrValues, endIndex: calldataFinalEndIndex + 1 };
     }
 
     getFunctionAbiFromSelector(_functionSelector: string) {
@@ -387,7 +391,7 @@ export class ContractCallOrganizer {
         };
         if(!this.functions) {
             throw new Error(
-                `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions declared for this ContractAnalyzer instance (functions: ${this.functions})`
+                `ContactCallOrganizer::getFunctionFromSelector - On contract ${this.address} no functions declared for this ContactCallOrganizer instance (functions: ${this.functions})`
             );
         }
 
@@ -395,7 +399,7 @@ export class ContractCallOrganizer {
 
         if(!fn) {
             throw new Error(
-                `ContractAnalyzer::getFunctionFromSelector - On contract ${this.address} no functions matching this selector (selector: ${functionSelector})`
+                `ContactCallOrganizer::getFunctionFromSelector - On contract ${this.address} no functions matching this selector (selector: ${functionSelector})`
             );
         }
 
@@ -405,36 +409,61 @@ export class ContractCallOrganizer {
     getStructAbiFromStructType(type: string) {
         if(!this.structs) {
             throw new Error(
-                `ContractAnalyzer::getStructFromStructs - On contract ${this.address} no struct specified for this instance (structs: ${this.structs})`
+                `ContactCallOrganizer::getStructFromStructs - On contract ${this.address} no struct specified for this instance (structs: ${this.structs})`
             );
         }
         
         const struct = this.structs[type];
         
         if(!struct) {
+            // console.log(this.structs)
             throw new Error(
-                `ContractAnalyzer::getStructFromStructs - On contract ${this.address} no struct specified for this type (structType: ${type})`
+                `ContactCallOrganizer::getStructFromStructs - On contract ${this.address} no struct specified for this type (structType: ${type})`
             );
         }
         return struct;
     }
 
+    getEnumAbiFromStructType(type: string) {
+        if(!this.enums) {
+            throw new Error(
+                `ContactCallOrganizer::getEnumAbiFromStructType - On contract ${this.address} no enum specified for this instance (enums: ${this.structs})`
+            );
+        }
+        
+        const _enum = this.enums[type];
+        
+        if(!_enum) {
+            // console.log(this.structs)
+            throw new Error(
+                `ContactCallOrganizer::getEnumAbiFromStructType - On contract ${this.address} no enum specified for this type (enumType: ${type})`
+            );
+        }
+        return _enum;
+    }
+
     getEventAbiFromKey(key: string) {
         if(!this.events) {
             throw new Error(
-                `ContractAnalyzer::getEventFromKey - On contract ${this.address} no events specified for this instance (events: ${this.events})`
+                `ContactCallOrganizer::getEventFromKey - On contract ${this.address} no events specified for this instance (events: ${this.events})`
             );
         }
 
         const event = this.events[key];
 
         if(!event) {
+            // console.log("this.events", this.events);
             throw new Error(
-                `ContractAnalyzer::getEventFromKey - On contract ${this.address}, no events specified for this key (key: ${key})`
+                `ContactCallOrganizer::getEventFromKey - On contract ${this.address}, no events specified for this key (key: ${key})`
             );
         }
         
         return event;
+    }
+
+    static _extractNameFromPath(path: string) {
+        const pathArr = path.split("::");
+        return pathArr[pathArr.length - 1];
     }
 
     get address() {
@@ -453,11 +482,16 @@ export class ContractCallOrganizer {
         return this._events;
     }
 
+    get enums() {
+        return this._enums;
+    }
+
     get abi() {
         return {
             functions: this.functions,
             events: this.events,
-            structs: this.structs
+            structs: this.structs,
+            enums: this.enums
         };
     }
 

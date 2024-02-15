@@ -5,7 +5,8 @@ export declare const uint256ToBN: (num: {
     low: string;
     high: string;
 }) => BigNumber;
-export declare function forceCast<T>(input: any): T;
+export declare const forceCast: <T>(input: any) => T;
+export declare const getArrayDepth: (value: any[]) => number;
 export * from "./ContractCallOrganizerStorage";
 export * from "./constants";
 //# sourceMappingURL=index.d.ts.map
