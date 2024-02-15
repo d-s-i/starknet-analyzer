@@ -1,6 +1,6 @@
-import { defaultProvider, ProviderInterface, addAddressPadding } from "starknet";
+import { ProviderInterface, addAddressPadding } from "starknet";
 
-import { getArrayDepth, getFullSelectorFromName } from "../helpers";
+import { getFullSelectorFromName } from "../helpers";
 
 import { 
     OrganizedEventAbi, 
@@ -94,7 +94,7 @@ export class ContractCallOrganizer {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
         }
     
-        return this.organizeContractAbiFromAbi(JSON.parse(abi as any)); // starknetjs type is incorrect and forward a string instead of an array
+        return this.organizeContractAbiFromAbi(typeof(abi) === "string" ? JSON.parse(abi as any) : abi); // starknetjs type is incorrect and forward a string instead of an array
     }
 
     static async organizeContractAbiFromClassHash(classHash: string, provider: ProviderInterface) {
@@ -164,7 +164,9 @@ export class ContractCallOrganizer {
         if(!_provider) {
             throw new Error(`ContractCallAnalyzer::initialize - No provider for this instance (provider: ${this.provider})`);
         }
+        console.log("getting FULL ABI");
         const { events, functions, structs, enums } = await ContractCallOrganizer.getFullContractAbi(this.address, _provider);
+        console.log("DOOONNNNNEEE");
         this._structs = structs;
         this._functions = functions;
         this._events = events;
