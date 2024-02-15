@@ -331,6 +331,14 @@ export class ContractCallOrganizer {
         return { structCalldata, endIndex: calldataIndex };
     }
 
+    /**
+     * @dev - Might need to add an arrayDepth to calldataFinalEndIndex instead of just `startIndex + 1` that probably works only for 1 depth
+     * Need to handle multiple depths
+     * @param type 
+     * @param fullCalldataValues 
+     * @param startIndex 
+     * @returns 
+     */
     _getArrayFromCalldata(
         type: string,
         fullCalldataValues: bigint[],

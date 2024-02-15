@@ -2,7 +2,6 @@ import {
   StructAbi,
   AbiEntry
 } from "starknet";
-import { BigNumberish } from "starknet/utils/number";
 
 export declare type Event = {
   from_address: string;

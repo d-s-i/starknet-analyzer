@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import { addAddressPadding, hash } from "starknet";
 
 export const sleep = async function(ms: number) {
@@ -10,7 +9,7 @@ export const getFullSelectorFromName = function(entrypoint: string) {
 }
 
 export const uint256ToBN = function(num: { low: string, high: string }) {
-    return BigNumber.from(num.low).add(num.high);
+    return BigInt(num.low) + BigInt(num.high);
 }
 
 export const forceCast = function<T>(input: any): T {
