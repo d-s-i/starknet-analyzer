@@ -17,7 +17,7 @@ import { Abi, Event } from "../types/rawStarknet";
 
 export class ContractCallOrganizer {
 
-    private _address: bigint;
+    private _address: string;
     private _structs: OrganizedStructAbi | undefined;
     private _functions: OrganizedFunctionAbi | undefined;
     private _events: OrganizedEventAbi | undefined;
@@ -25,7 +25,7 @@ export class ContractCallOrganizer {
     private _provider: ProviderInterface | undefined;
 
     constructor(
-        contractAddress: bigint,
+        contractAddress: string,
         structs?: OrganizedStructAbi, 
         functions?: OrganizedFunctionAbi, 
         events?: OrganizedEventAbi,
@@ -43,9 +43,9 @@ export class ContractCallOrganizer {
         Then if in the abi there is an implementation, query `getClass`. The implementation should not be deployed so the 
         implementation query should return a classHash which is used in getClass
     */
-    static async getFullContractAbi(contractAddress: bigint, provider: ProviderInterface) {
+    static async getFullContractAbi(contractAddress: string, provider: ProviderInterface) {
 
-        let { functions, structs, events, enums } = await this.organizeContractAbiFromContractAddress(contractAddress.toString(16), provider);
+        let { functions, structs, events, enums } = await this.organizeContractAbiFromContractAddress(contractAddress, provider);
 
         const implementationEntryPoints = [
             "get_implementation_hash", 
@@ -61,7 +61,7 @@ export class ContractCallOrganizer {
         });
         if(getImplementationIndex !== -1) {
             const { result: [implementationClassHash] } = await provider.callContract({
-                contractAddress: contractAddress.toString(16),
+                contractAddress: contractAddress,
                 entrypoint: implementationEntryPoints[getImplementationIndex]
             });
             try {
@@ -179,7 +179,7 @@ export class ContractCallOrganizer {
             throw new Error(`ContractCallAnalyzer::callViewFn - No provider for this instance (provider: ${this.provider})`);
         }
         const { result: rawRes } = await _provider.callContract({
-            contractAddress: this.address.toString(16),
+            contractAddress: this.address,
             entrypoint,
             calldata: calldata || []
         });

@@ -6,7 +6,7 @@ export declare class TransactionCallOrganizer extends ReceiptOrganizer {
     organizeCalldataOfTx(transaction: InvokeTransactionResponse): Promise<FunctionCall[]>;
     organizeFunctionCalls(callArray: CallArray[], fullTxCalldata: BigInt[]): Promise<{
         name: any;
-        to: bigint;
+        to: string;
         calldata: any;
     }[]>;
     /**

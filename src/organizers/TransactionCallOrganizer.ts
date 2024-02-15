@@ -33,10 +33,10 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         let rawCalldataIndex = 0;
         let functionCalls = [];
         for(const call of callArray) {
-            const contractCallOrganizer: ContractCallOrganizerMap = await super.getContractOrganizer(addAddressPadding(call.to.toString()));
+            const contractCallOrganizer: ContractCallOrganizerMap = await super.getContractOrganizer(addAddressPadding(call.to));
     
             const { subcalldata, endIndex } = contractCallOrganizer.organizeFunctionInput(
-                call.selector.toString(16), 
+                call.selector, 
                 fullTxCalldata, 
                 rawCalldataIndex, 
             );
@@ -45,7 +45,7 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
             }
             rawCalldataIndex = endIndex;
             functionCalls.push({
-                name: contractCallOrganizer.getFunctionAbiFromSelector(call.selector.toString(16)).name,
+                name: contractCallOrganizer.getFunctionAbiFromSelector(call.selector).name,
                 to: call.to,
                 calldata: subcalldata
             });
@@ -89,8 +89,8 @@ export class TransactionCallOrganizer extends ReceiptOrganizer {
         // see the `__execute__` function's args at https://github.com/OpenZeppelin/cairo-contracts/blob/main/src/openzeppelin/account/Account.cairo
         for(let i = 1; i < callArrayLength * callArrayStructLength; i = i + callArrayStructLength) {
             callArray.push({
-                to: BigInt(tx.calldata![i]),
-                selector: BigInt(tx.calldata![i + 1]),
+                to: tx.calldata![i],
+                selector: tx.calldata![i + 1],
                 dataOffset: BigInt(tx.calldata![i + 2]),
                 dataLen: BigInt(tx.calldata![i + 3]),
             });

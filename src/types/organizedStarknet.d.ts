@@ -53,15 +53,15 @@ export interface StarknetEnum {
 export type StarknetArgument = { [key: string]: any };
 
 export interface CallArray {
-    to: bigint,
-    selector: bigint,
+    to: string,
+    selector: string,
     dataOffset: bigint,
     dataLen: bigint
 }
 
 export interface FunctionCall {
     name: string;
-    to: bigint;
+    to: string;
     calldata: OrganizedArgument[];
 }
 

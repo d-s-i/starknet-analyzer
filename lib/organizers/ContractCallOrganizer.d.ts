@@ -8,8 +8,8 @@ export declare class ContractCallOrganizer {
     private _events;
     private _enums;
     private _provider;
-    constructor(contractAddress: bigint, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: ProviderInterface);
-    static getFullContractAbi(contractAddress: bigint, provider: ProviderInterface): Promise<StarknetContractCode>;
+    constructor(contractAddress: string, structs?: OrganizedStructAbi, functions?: OrganizedFunctionAbi, events?: OrganizedEventAbi, provider?: ProviderInterface);
+    static getFullContractAbi(contractAddress: string, provider: ProviderInterface): Promise<StarknetContractCode>;
     static organizeContractAbiFromContractAddress(contractAddress: string, provider: ProviderInterface): Promise<StarknetContractCode>;
     static organizeContractAbiFromClassHash(classHash: string, provider: ProviderInterface): Promise<StarknetContractCode>;
     static organizeContractAbiFromAbi(abi: Abi): StarknetContractCode;
@@ -68,7 +68,7 @@ export declare class ContractCallOrganizer {
     static _extractNameFromPath(path: string): string;
     _isArray(type: string): boolean;
     _arrayDepthFromType(type: string): number;
-    get address(): bigint;
+    get address(): string;
     get structs(): OrganizedStructAbi | undefined;
     get functions(): OrganizedFunctionAbi | undefined;
     get events(): OrganizedEventAbi | undefined;
