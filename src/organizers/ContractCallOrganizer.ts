@@ -246,6 +246,7 @@ export class ContractCallOrganizer {
         let eventArgs: any[] = [];
         let eventInKeys = [];
         for(const member of eventAbi.members) {
+
             if(member.kind === "key") {
                 eventInKeys.push(member);
                 continue;
@@ -296,15 +297,14 @@ export class ContractCallOrganizer {
             // const value = { [enumName]:  };
             return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
         } else {
-            const pathArr = type.split("::");
-            const isArray = (pathArr[0] === "core" || pathArr[0] === "@core") && pathArr[1] === "array";
-            if(isArray) {
+            if(this._isArray(type)) {
                 const typeStart = type.indexOf("<") + 1;
                 const typeEnd = type.lastIndexOf(">");
                 const arrayType = type.slice(typeStart, typeEnd);
                 const { arrValues, endIndex } = this._getArrayFromCalldata(arrayType, calldata.fullCalldataValues, calldata.startIndex);
+                const arrayDepthOver1 = this._arrayDepthFromType(type) > 1 ? this._arrayDepthFromType(type) - 1 : 0;
 
-                return { argsValues: arrValues, endIndex: endIndex };
+                return { argsValues: arrValues, endIndex: endIndex + 1 - arrayDepthOver1 };
             }
 
             return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
@@ -336,7 +336,9 @@ export class ContractCallOrganizer {
         fullCalldataValues: bigint[],
         startIndex: number
     ) {
-        let calldataFinalEndIndex = startIndex;
+        const isNestedArray = this._isArray(type);
+        // let calldataFinalEndIndex = startIndex;
+        let calldataFinalEndIndex = isNestedArray ? startIndex + 1 : startIndex;
 
         const arrLength = +fullCalldataValues[startIndex].toString();
         const start = startIndex + 1;
@@ -348,7 +350,7 @@ export class ContractCallOrganizer {
             calldataFinalEndIndex = endIndex;
         }
         
-        return { arrValues, endIndex: calldataFinalEndIndex + 1 };
+        return { arrValues, endIndex: calldataFinalEndIndex };
     }
 
     getFunctionAbiFromSelector(_functionSelector: string) {
@@ -464,6 +466,16 @@ export class ContractCallOrganizer {
     static _extractNameFromPath(path: string) {
         const pathArr = path.split("::");
         return pathArr[pathArr.length - 1];
+    }
+
+    _isArray(type: string) {
+        const pathArr = type.split("::");
+        const isArray = (pathArr[0] === "core" || pathArr[0] === "@core") && pathArr[1] === "array";
+        return (isArray);
+    }
+
+    _arrayDepthFromType(type: string) {
+        return (type.match(/core::array/g) || []).length;
     }
 
     get address() {

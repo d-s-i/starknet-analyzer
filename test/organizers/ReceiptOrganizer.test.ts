@@ -16,8 +16,12 @@ testReceiptOrganizer && describe("ReceiptOrganizer", async function() {
         for(const _event of organizedEvents) {
             console.log("\n");
             console.log(_event.name);
-            for(const val of _event.calldata) {
-                console.log(val);
+            if(_event.name === "account::argent_account::ArgentAccount::TransactionExecuted") {
+                for(const val of _event.calldata) {
+                    if(val.name === "response") {
+                        console.log(val.value.snapshot);
+                    }
+                }
             }
         }
     });
