@@ -58,6 +58,8 @@ export declare class ContractCallOrganizer {
     getEnumAbiFromStructType(type: string): import("../types/organizedStarknet").StarknetEnum;
     getEventAbiFromKey(key: string): import("../types/rawStarknet").EventAbi;
     static _extractNameFromPath(path: string): string;
+    _isArray(type: string): boolean;
+    _arrayDepthFromType(type: string): number;
     get address(): bigint;
     get structs(): OrganizedStructAbi | undefined;
     get functions(): OrganizedFunctionAbi | undefined;
