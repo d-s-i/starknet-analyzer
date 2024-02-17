@@ -234,6 +234,8 @@ export class ContractCallOrganizer {
         }
 
         if(calldataIndex !== fullCalldataValues.length) {
+            console.log("dataIndex", calldataIndex);
+            console.log("event.data.length", fullCalldataValues.length, fullCalldataValues);
             throw new Error(`ContractCallOrganizer::organizeFunctionOutput - Data should have reached end of event calldata (make sure you didn't forgot to handle a given type)`);
         }
         return { subcalldata: calldata, endIndex: calldataIndex };
@@ -241,6 +243,7 @@ export class ContractCallOrganizer {
     
     organizeEvent(event: Event) {
         const eventSelector = event.keys[0];
+
         const eventAbi = this.getEventAbiFromKey(addAddressPadding(eventSelector));
         let dataIndex = 0;
         let eventArgs: any[] = [];
@@ -270,6 +273,7 @@ export class ContractCallOrganizer {
         if(dataIndex !== event.data.length) {
             console.log("dataIndex", dataIndex);
             console.log("event.data.length", event.data.length);
+
             throw new Error(`ContractCallOrganizer::organizeEvent - Data should have reached end of event calldata (make sure you didn't forgot to handle a given type)`);
         }
 
@@ -298,13 +302,10 @@ export class ContractCallOrganizer {
             return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
         } else {
             if(this._isArray(type)) {
-                const typeStart = type.indexOf("<") + 1;
-                const typeEnd = type.lastIndexOf(">");
-                const arrayType = type.slice(typeStart, typeEnd);
+                const arrayType = this._getArrayType(type);
                 const { arrValues, endIndex } = this._getArrayFromCalldata(arrayType, calldata.fullCalldataValues, calldata.startIndex);
-                const arrayDepthOver1 = this._arrayDepthFromType(type) > 1 ? this._arrayDepthFromType(type) - 1 : 0;
-
-                return { argsValues: arrValues, endIndex: endIndex + 1 - arrayDepthOver1 };
+                
+                return { argsValues: arrValues, endIndex: endIndex };
             }
 
             return { argsValues: calldata.fullCalldataValues[calldata.startIndex], endIndex: calldata.startIndex + 1 };
@@ -343,22 +344,28 @@ export class ContractCallOrganizer {
         type: string,
         fullCalldataValues: bigint[],
         startIndex: number
-    ) {
-        const isNestedArray = this._isArray(type);
-        // let calldataFinalEndIndex = startIndex;
-        let calldataFinalEndIndex = isNestedArray ? startIndex + 1 : startIndex;
+    ): { arrValues: any[], endIndex: number } {
 
-        const arrLength = +fullCalldataValues[startIndex].toString();
-        const start = startIndex + 1;
-        const end = start + arrLength;
-        let arrValues: any[] = [];
-        for(let i = start; i < end; i++) {
-            const { argsValues, endIndex } = this._decodeData(type, { fullCalldataValues, startIndex: calldataFinalEndIndex })
-            arrValues.push(argsValues);
-            calldataFinalEndIndex = endIndex;
+        const isNestedArray = this._isArray(type);
+        if(isNestedArray) {
+            const arrayType = this._getArrayType(type);
+            return this._getArrayFromCalldata(arrayType, fullCalldataValues, startIndex + 1);
+        } else {
+            let calldataFinalEndIndex = startIndex + 1;
+    
+            const arrLength = +fullCalldataValues[startIndex].toString();
+            const start = startIndex + 1; // first value comes from after array length
+            const end = start + arrLength;
+            let arrValues: any[] = [];
+            for(let i = start; i < end; i++) {
+                const { argsValues, endIndex } = this._decodeData(type, { fullCalldataValues, startIndex: calldataFinalEndIndex })
+                arrValues.push(argsValues);
+                calldataFinalEndIndex = endIndex;
+            }
+            
+            return { arrValues, endIndex: calldataFinalEndIndex };
         }
-        
-        return { arrValues, endIndex: calldataFinalEndIndex };
+
     }
 
     getFunctionAbiFromSelector(_functionSelector: string) {
@@ -484,6 +491,13 @@ export class ContractCallOrganizer {
 
     _arrayDepthFromType(type: string) {
         return (type.match(/core::array/g) || []).length;
+    }
+
+    _getArrayType(type: string) {
+        const typeStart = type.indexOf("<") + 1;
+        const typeEnd = type.lastIndexOf(">");
+        const arrayType = type.slice(typeStart, typeEnd);
+        return arrayType;
     }
 
     get address() {

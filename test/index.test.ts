@@ -19,8 +19,8 @@ export const INVOKE_TX = "0x06bf2fbfaee2c7c86728ba7db3038d23ff58566e2481c0ea3fc5
 
 export const testBlockOrganizer = false;
 export const testContractCallOrganizer = false;
-export const testReceiptOrganizer = false;
-export const testTransactionCallOrganizer = true;
+export const testReceiptOrganizer = true;
+export const testTransactionCallOrganizer = false;
 
 export let contractCallOrganizer;
 export const transactionCallOrganizer = new TransactionCallOrganizer(provider);

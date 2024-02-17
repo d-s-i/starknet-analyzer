@@ -68,6 +68,7 @@ export declare class ContractCallOrganizer {
     static _extractNameFromPath(path: string): string;
     _isArray(type: string): boolean;
     _arrayDepthFromType(type: string): number;
+    _getArrayType(type: string): string;
     get address(): string;
     get structs(): OrganizedStructAbi | undefined;
     get functions(): OrganizedFunctionAbi | undefined;
