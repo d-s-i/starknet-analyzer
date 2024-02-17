@@ -11,15 +11,17 @@ testReceiptOrganizer && describe("ReceiptOrganizer", async function() {
             "0x139337f64ec1406c41e4ab1eecfc6593f67e5e8a96ed684956f0f66d54b00fb"
         ];
         
-        const receipt = await provider.getTransactionReceipt(txs[4]);
+        const receipt = await provider.getTransactionReceipt("0x7372d496f27508861eee3b10c53f931db5c948df1150cc24d1a2b895daefdd1");
         const organizedEvents = await receiptOrganizer.getEventsFromReceipt(receipt as any);
         console.log("\n\nORGANIZED EVENTS");
         for(const _event of organizedEvents) {
             console.log("\n");
             console.log(_event.name);
-            if(_event.name === "game::Game::ItemsLeveledUp") {
+            if(_event.name === "game::Game::AdventurerUpgraded") {
                 for(const val of _event.calldata) {
-                    console.log(val.value);
+                    if(val.name === "adventurer_state_with_bag") {
+                        console.log(val.name, val.value.adventurer_state.adventurer.stats);
+                    }
                 }
             }
         }

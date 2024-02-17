@@ -88,7 +88,8 @@ export class ContractCallOrganizer {
 
     static async organizeContractAbiFromContractAddress(contractAddress: string, provider: ProviderInterface) {
         // putting defaultProvider by default bc pathfinder nodes doesn't return abis
-        const { abi } = await provider.getClassAt(contractAddress);
+        const { abi, entry_points_by_type } = await provider.getClassAt(contractAddress);
+        console.log("abi", abi);
 
         if(!abi) {
             throw new Error(`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`);
@@ -113,7 +114,7 @@ export class ContractCallOrganizer {
         let enums: OrganizedEnumAbi = {};
         let events: OrganizedEventAbi = {};
         let structs: OrganizedStructAbi = {};
-        let _interface;
+        const interfaces = [];
         for(const item of abi) {
             if(item.type === "impl") continue;
 
@@ -138,17 +139,18 @@ export class ContractCallOrganizer {
                 const _name = getFullSelectorFromName(itemName);
                 events[_name] = item;
             } else if(item.type === "interface") {
-                _interface = item;
+                interfaces.push(item);
             } else {
                 console.log("item", item);
                 throw new Error(`ContractCallOrganizer::organizeContractAbiFromAbi - Unhandled item type ${item.type}`);
             }
         }
 
-        if(_interface) {
-            for(const item of _interface.items) {
+        for(const iface of interfaces) {
+            for(const item of iface.items) {
                 if(item.type === "function") {
                     const itemName = this._extractNameFromPath(item.name)
+                    console.log("itemName", itemName);
                     const _name = getFullSelectorFromName(itemName);
                     functions[_name] = item;
                 } else {

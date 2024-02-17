@@ -11,11 +11,11 @@ testContractCallOrganizer && describe("ContractCallOrganizer", function() {
     //     console.log("res", res);
     // });
 
-    // it("`getFullContractAbi`- Fecth ABI for a proxy", async function() { // Doesn't work yet, need the `getClass` method
-    //     const res = await ContractCallOrganizer.getFullContractAbi(BigInt("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"), provider);
+    it("`getFullContractAbi`- Fecth ABI for a proxy", async function() { // Doesn't work yet, need the `getClass` method
+        const res = await ContractCallOrganizer.getFullContractAbi("0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", provider);
 
-    //     console.log("res", res);
-    // });
+        // console.log("res", res);
+    });
 
     // it("`organizeCalldata` - Organize function input (= calldata) into readable calldata", async function() {
 
@@ -33,21 +33,21 @@ testContractCallOrganizer && describe("ContractCallOrganizer", function() {
         
     // });
 
-    it("`organizeCalldata` - Organize function output into readable calldata", async function() {
+    // it("`organizeCalldata` - Organize function output into readable calldata", async function() {
 
-        const tx = await provider.getTransaction(INVOKE_TX);
+    //     const tx = await provider.getTransaction(INVOKE_TX);
 
-        const contractCalls = TransactionCallOrganizer.destructureFunctionCalldata(tx);
+    //     const contractCalls = TransactionCallOrganizer.destructureFunctionCalldata(tx);
 
-        for(let i = 0; i < contractCalls.callArray.length; i++) {
-            const contractCallOrganizer = await new ContractCallOrganizer(contractCalls.callArray[i].to).initialize(provider);
+    //     for(let i = 0; i < contractCalls.callArray.length; i++) {
+    //         const contractCallOrganizer = await new ContractCallOrganizer(contractCalls.callArray[i].to).initialize(provider);
 
-            const organizeFunctionOutput = await contractCallOrganizer.organizeFunctionOutput(contractCalls.callArray[i].selector, contractCalls.rawFnCalldata);
+    //         const organizeFunctionOutput = await contractCallOrganizer.organizeFunctionOutput(contractCalls.callArray[i].selector, contractCalls.rawFnCalldata);
     
-            console.log("organizeFunctionOutput", organizeFunctionOutput);
-        }
+    //         console.log("organizeFunctionOutput", organizeFunctionOutput);
+    //     }
         
-    });
+    // });
 
     // it("`organizeEvent` - Organize event into readable calldata", async function() {
     //     const receipt = await provider.getTransactionReceipt("0x18aed1624bbb0cd939b33f311b2461efbb87fa98a54ae0ea1597579c42e845a") as InvokeTransactionReceiptResponse; // v0 and v1 receipts are the same
