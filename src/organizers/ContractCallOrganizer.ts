@@ -150,7 +150,6 @@ export class ContractCallOrganizer {
             for(const item of iface.items) {
                 if(item.type === "function") {
                     const itemName = this._extractNameFromPath(item.name)
-                    console.log("itemName", itemName);
                     const _name = getFullSelectorFromName(itemName);
                     functions[_name] = item;
                 } else {
