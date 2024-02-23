@@ -11,7 +11,7 @@ testReceiptOrganizer && describe("ReceiptOrganizer", async function() {
             "0x139337f64ec1406c41e4ab1eecfc6593f67e5e8a96ed684956f0f66d54b00fb"
         ];
         
-        const receipt = await provider.getTransactionReceipt("0x7372d496f27508861eee3b10c53f931db5c948df1150cc24d1a2b895daefdd1");
+        const receipt = await provider.getTransactionReceipt("0x321d1b1820cf867d42331239bfe80d2c577c73cbb27a4953c4062f3341ed830");
         const organizedEvents = await receiptOrganizer.getEventsFromReceipt(receipt as any);
         console.log("\n\nORGANIZED EVENTS");
         for(const _event of organizedEvents) {

@@ -18,8 +18,8 @@ export const provider = new RpcProvider({ nodeUrl: process.env.STARKNET_GOERLI_N
 export const INVOKE_TX = "0x06bf2fbfaee2c7c86728ba7db3038d23ff58566e2481c0ea3fc5c9b71cbe8171";
 
 export const testBlockOrganizer = false;
-export const testContractCallOrganizer = true;
-export const testReceiptOrganizer = false;
+export const testContractCallOrganizer = false;
+export const testReceiptOrganizer = true;
 export const testTransactionCallOrganizer = false;
 
 export let contractCallOrganizer;

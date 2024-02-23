@@ -5,7 +5,7 @@ testTransactionCallOrganizer && describe("TransactionCallOrganizer", function() 
 
     it("`organizeCalldataOfTx` - Organize calldata into readable object for every contract call made in the transaction v0", async function() {
         const txCallOrganizer = new TransactionCallOrganizer(provider);
-        const tx = await provider.getTransaction("0x18aed1624bbb0cd939b33f311b2461efbb87fa98a54ae0ea1597579c42e845a");
+        const tx = await provider.getTransaction("0x321d1b1820cf867d42331239bfe80d2c577c73cbb27a4953c4062f3341ed830");
         console.log("tx", tx)
         const organizedCalldata = await txCallOrganizer.organizeCalldataOfTx(tx);
         console.log("organizedCalldata", organizedCalldata);
